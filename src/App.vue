@@ -16,6 +16,7 @@ export interface Item {
     width: number;
     height: number;
     columnSpan: number;
+    newRow?: boolean;
     renderContent: (item: Item) => string;
 }
 
@@ -42,6 +43,7 @@ export default class App extends Vue {
             width: 500,
             height: 250,
             columnSpan: 2,
+            newRow: true,
             renderContent: (item: Item) => `<div class="title"
                 style="height:${item.height}px;"
             >

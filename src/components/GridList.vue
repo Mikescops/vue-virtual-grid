@@ -93,7 +93,6 @@ export default class HelloWorld extends Vue {
         this.computeConfigData(this.containerData, this.items);
         this.computeLayoutData(this.configData);
         this.computeRenderData(this.configData, this.containerData, this.layoutData);
-        console.log(this.layoutData.totalHeight);
     }
 
     public beforeDestroy() {
@@ -192,6 +191,10 @@ export default class HelloWorld extends Vue {
         let columnShift = 0;
 
         const cells: Cell[] = configData.entries.map((entry, index) => {
+            if (entry.newRow) {
+                columnShift += configData.columnCount - (((index + columnShift) % configData.columnCount));
+            }
+
             const shiftedIndex = index + columnShift;
 
             const columnNumber = (shiftedIndex % configData.columnCount) + 1;
