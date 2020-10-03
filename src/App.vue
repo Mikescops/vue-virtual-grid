@@ -1,13 +1,17 @@
 <template>
     <div id="app">
         <img alt="Vue logo" src="./assets/logo.png" />
-        <GridList :updateFunction="pullData" />
+        <GridList :updateFunction="pullData" :batchSize="batchSize" />
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Provide, Vue } from 'vue-property-decorator';
 import GridList from './components/GridList.vue';
+
+// Custom components to render
+import Image from './components/Image.vue';
+import Title from './components/Title.vue';
 
 export interface Item {
     id: string;
@@ -17,7 +21,7 @@ export interface Item {
     height: number;
     columnSpan: number;
     newRow?: boolean;
-    renderContent: (item: Item) => string;
+    renderComponent: Vue.Component;
 }
 
 @Component({
@@ -26,12 +30,14 @@ export interface Item {
     }
 })
 export default class App extends Vue {
+    @Provide() private batchSize: number = 50;
+
     private random(low: number, high: number) {
         return Math.floor(Math.random() * high) + low;
     }
 
     private pullData(params: { batchSize: number; offset: number }): Item[] {
-        // This is to try when we reach end of ifinite scroll (only 5 loads)
+        // This is to try when we reach end of infinite scroll (only 5 loads)
         if (params.offset > 5) {
             return [];
         }
@@ -44,14 +50,10 @@ export default class App extends Vue {
             height: 250,
             columnSpan: 2,
             newRow: true,
-            renderContent: (item: Item) => `<div class="title"
-                style="height:${item.height}px;"
-            >
-                <h2>${item.title}</h2>
-            </div>`
+            renderComponent: Title
         };
 
-        // Populate random images
+        // Populate random images (for the demo)
         const randomImages = Array.from({ length: params.batchSize }, (_, index) => {
             const randSize = this.random(1, 2); // just to randomized which images can be big or not
 
@@ -65,12 +67,7 @@ export default class App extends Vue {
                 width,
                 height,
                 columnSpan: randSize,
-                renderContent: (item: Item) => `<img
-                        src="${item.url}"
-                        title="${item.title}"
-						height="${item.height}"
-						class="image"
-					/>`
+                renderComponent: Image
             };
         });
 
@@ -79,7 +76,7 @@ export default class App extends Vue {
 }
 </script>
 
-<style>
+<style scoped>
 #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -87,32 +84,5 @@ export default class App extends Vue {
     text-align: center;
     color: #2c3e50;
     margin-top: 60px;
-}
-
-/* This is the rendered classes (custom for the demo) */
-.grid .title {
-    display: inline-grid;
-    align-items: center;
-    width: 100%;
-    color: #fff;
-    background: #666;
-
-    border-radius: 4px;
-}
-
-.grid .image {
-    position: relative;
-    width: 100%;
-    height: auto;
-    vertical-align: top;
-    background: hsl(0, 0%, 98%);
-    transition: 100ms ease;
-    transition-property: transform box-shadow;
-}
-.grid .image:hover {
-    z-index: 1;
-    transform: scale(1.25);
-    box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2),
-        0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12);
 }
 </style>

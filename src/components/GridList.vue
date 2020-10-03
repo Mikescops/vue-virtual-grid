@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Prop, Component, Vue, ProvideReactive, Provide } from 'vue-property-decorator';
+import { Prop, Component, Vue, ProvideReactive } from 'vue-property-decorator';
 import { Item } from '../App.vue';
 
 interface ContainerData {
@@ -50,7 +50,7 @@ export default class HelloWorld extends Vue {
     @ProvideReactive() items: Item[] = [];
     @ProvideReactive() content: Item[] = [];
 
-    @Provide() batchSize: number = 20;
+    @Prop() batchSize: number;
     @ProvideReactive() offset: number = 0;
     @ProvideReactive() bottomReached: boolean = false;
 
@@ -403,14 +403,18 @@ export default class HelloWorld extends Vue {
                         'grid-column-end': item.columnNumber + item.columnSpan,
                         'grid-row-start': getGridRowStart(item, renderData)
                     }"
-                    v-html="item.renderContent({ ...item })"
-                ></div>
+                >
+                    <component
+                        :is="item.renderComponent"
+                        :item="item"
+                    ></component>
+                </div>
             </template>
         </div>
     </div>
 </template>
 
-<style>
+<style scoped>
 .grid {
     display: grid;
     align-items: center;

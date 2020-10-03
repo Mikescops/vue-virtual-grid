@@ -1,0 +1,37 @@
+<template>
+    <img
+        :src="item.url"
+        :title="item.title"
+        :height="item.height"
+        class="image"
+    />
+</template>
+
+<script lang="ts">
+import { Prop, Component, Vue } from 'vue-property-decorator';
+import { Item } from '../App.vue';
+
+@Component
+export default class HelloWorld extends Vue {
+    @Prop() private item: Item;
+}
+
+</script>
+
+<style scoped>
+.image {
+    position: relative;
+    width: 100%;
+    height: auto;
+    vertical-align: top;
+    background: hsl(0, 0%, 98%);
+    transition: 100ms ease;
+    transition-property: transform box-shadow;
+}
+.image:hover {
+    z-index: 1;
+    transform: scale(1.25);
+    box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2),
+        0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12);
+}
+</style>
