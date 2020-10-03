@@ -1,6 +1,16 @@
 <script lang="ts">
 import { Prop, Component, Vue, ProvideReactive } from 'vue-property-decorator';
-import { Item } from '../App.vue';
+
+export interface Item {
+    id: string;
+    title: string;
+    url: string;
+    width: number;
+    height: number;
+    columnSpan: number;
+    newRow?: boolean;
+    renderComponent: Vue.Component;
+}
 
 interface ContainerData {
     windowSize: ElementSize;
@@ -44,7 +54,7 @@ interface RenderData {
 }
 
 @Component
-export default class HelloWorld extends Vue {
+export default class GridList extends Vue {
     @Prop() private updateFunction: (params: { batchSize: number; offset: number }) => Item[];
 
     @ProvideReactive() items: Item[] = [];

@@ -7,26 +7,15 @@
 
 <script lang="ts">
 import { Component, Provide, Vue } from 'vue-property-decorator';
-import GridList from './components/GridList.vue';
+import * as GridList from './components/GridList.vue';
 
 // Custom components to render
 import Image from './components/Image.vue';
 import Title from './components/Title.vue';
 
-export interface Item {
-    id: string;
-    title: string;
-    url: string;
-    width: number;
-    height: number;
-    columnSpan: number;
-    newRow?: boolean;
-    renderComponent: Vue.Component;
-}
-
 @Component({
     components: {
-        GridList
+        GridList: GridList.default
     }
 })
 export default class App extends Vue {
@@ -36,7 +25,7 @@ export default class App extends Vue {
         return Math.floor(Math.random() * high) + low;
     }
 
-    private pullData(params: { batchSize: number; offset: number }): Item[] {
+    private pullData(params: { batchSize: number; offset: number }): GridList.Item[] {
         // This is to try when we reach end of infinite scroll (only 5 loads)
         if (params.offset > 5) {
             return [];

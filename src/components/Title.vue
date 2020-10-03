@@ -6,13 +6,12 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import { Item } from '../App.vue';
+import { Item } from './GridList.vue';
 
 @Component
-export default class HelloWorld extends Vue {
+export default class Title extends Vue {
     @Prop() private item: Item;
 }
-
 </script>
 
 <style scoped>
