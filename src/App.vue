@@ -10,8 +10,9 @@ import { Component, Provide, Vue } from 'vue-property-decorator';
 import * as GridList from './components/GridList.vue';
 
 // Custom components to render
-import Image from './components/Image.vue';
-import Title from './components/Title.vue';
+import ImageComponent from './components/Image.vue';
+import TitleComponent from './components/Title.vue';
+import MapComponent from './components/Map.vue';
 
 @Component({
     components: {
@@ -31,6 +32,7 @@ export default class App extends Vue {
             return [];
         }
 
+        // Add a title at each section
         const sectionTitle = {
             id: `title-${params.offset}`,
             title: `Welcome to section ${params.offset}`,
@@ -39,8 +41,20 @@ export default class App extends Vue {
             height: 250,
             columnSpan: 2,
             newRow: true,
-            renderComponent: Title
+            renderComponent: TitleComponent
         };
+
+        // Add a map sometimes (to test iframes)
+        const sectionMap = this.random(1, 4) === 1 ? [{
+            id: `map-${params.offset}`,
+            title: '',
+            url: '-11.18408203125%2C39.2832938689385%2C17.819824218750004%2C52.77618568896171',
+            width: 1000,
+            height: 200,
+            columnSpan: 1000,
+            newRow: true,
+            renderComponent: MapComponent
+        }] : [];
 
         // Populate random images (for the demo)
         const randomImages = Array.from({ length: params.batchSize }, (_, index) => {
@@ -56,11 +70,11 @@ export default class App extends Vue {
                 width,
                 height,
                 columnSpan: randSize,
-                renderComponent: Image
+                renderComponent: ImageComponent
             };
         });
 
-        return [sectionTitle, ...randomImages];
+        return [sectionTitle, ...randomImages, ...sectionMap];
     }
 }
 </script>

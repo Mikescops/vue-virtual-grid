@@ -9,7 +9,7 @@ import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Item } from './GridList.vue';
 
 @Component
-export default class Title extends Vue {
+export default class TitleComponent extends Vue {
     @Prop() private item: Item;
 }
 </script>

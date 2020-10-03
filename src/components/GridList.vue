@@ -201,12 +201,12 @@ export default class GridList extends Vue {
         let columnShift = 0;
 
         const cells: Cell[] = configData.entries.map((entry, index) => {
-            if (entry.newRow) {
-                columnShift += configData.columnCount - (((index + columnShift) % configData.columnCount));
+            const distanceToRowStart = (index + columnShift) % (configData.columnCount);
+            if (entry.newRow && distanceToRowStart !== 0) {
+                columnShift += configData.columnCount - distanceToRowStart;
             }
 
             const shiftedIndex = index + columnShift;
-
             const columnNumber = (shiftedIndex % configData.columnCount) + 1;
             const rowNumber = Math.floor(shiftedIndex / configData.columnCount) + 1;
 
@@ -219,7 +219,7 @@ export default class GridList extends Vue {
                 entry.columnSpan -= overlapNumber;
             }
 
-            // we need to count the shift created by multiple column images
+            // we need to count the shift created by multiple column objects
             if (entry.columnSpan > 1) {
                 columnShift += entry.columnSpan - 1;
             }

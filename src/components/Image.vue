@@ -2,7 +2,7 @@
     <img
         :src="item.url"
         :title="item.title"
-        :height="item.height"
+        :style="{ height: item.height + 'px' }"
         class="image"
     />
 </template>
@@ -12,7 +12,7 @@ import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Item } from './GridList.vue';
 
 @Component
-export default class Image extends Vue {
+export default class ImageComponent extends Vue {
     @Prop() private item: Item;
 }
 </script>
