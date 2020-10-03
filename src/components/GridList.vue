@@ -173,6 +173,11 @@ export default class GridList extends Vue {
         const columnWidth = this.getColumnWidth(columnCount, gridGap, elementWidth);
 
         const entries = items.map((item) => {
+            // if the column span is 0 or negative we assume it is full width
+            if (item.columnSpan < 1) {
+                item.columnSpan = columnCount;
+            }
+
             const imageWidth = (columnWidth * item.columnSpan) + (gridGap * (item.columnSpan - 1));
             return {
                 ...item,

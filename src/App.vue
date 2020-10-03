@@ -51,7 +51,7 @@ export default class App extends Vue {
             url: '-11.18408203125%2C39.2832938689385%2C17.819824218750004%2C52.77618568896171',
             width: 1000,
             height: 200,
-            columnSpan: 1000,
+            columnSpan: 0,
             newRow: true,
             renderComponent: MapComponent
         }] : [];
