@@ -11,11 +11,12 @@ import GridList from './components/GridList.vue';
 
 export interface Item {
     id: number;
+    title: string;
     url: string;
     width: number;
     height: number;
-    isVisible: boolean;
     columnSpan: number;
+    renderContent: (item: Item) => string;
 }
 
 @Component({
@@ -43,11 +44,17 @@ export default class App extends Vue {
             const id = index + params.offset;
             return {
                 id,
+                title: `Image ${id}`,
                 url: `https://picsum.photos/id/${id + 1}/${width}/${height}.jpg`,
                 width,
                 height,
-                isVisible: false,
-                columnSpan: randSize
+                columnSpan: randSize,
+                renderContent: (item: Item) => `<img
+                        src="${item.url}"
+                        title="${item.title}"
+						height="${item.height}"
+						class="image"
+					/>`
             };
         });
     }

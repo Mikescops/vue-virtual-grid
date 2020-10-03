@@ -2,10 +2,6 @@
 import { Prop, Component, Vue, ProvideReactive, Provide } from 'vue-property-decorator';
 import { Item } from '../App.vue';
 
-
-import VueObserveVisibility from 'vue-observe-visibility';
-Vue.use(VueObserveVisibility);
-
 interface ContainerData {
     windowSize: ElementSize;
     windowScroll: ElementScroll;
@@ -371,23 +367,6 @@ export default class HelloWorld extends Vue {
         const imageRatio = height / width;
         return Math.round(columnWidth * imageRatio);
     }
-
-    /** Test of visibility observer */
-    private visibilityChanged(isVisible: boolean, _entry: unknown, id: number) {
-        if (this.content.length === 0) {
-            this.content = this.items;
-        }
-
-        this.content = this.content.map(item =>
-            item.id === id
-                ? { ...item, isVisible }
-                : { ...item }
-        );
-        console.log(
-            this.content.filter((item) => item.isVisible).length,
-            this.content.map((item) => `${item.id}-${item.isVisible}`)
-        );
-    }
 }
 </script>
 
@@ -421,29 +400,17 @@ export default class HelloWorld extends Vue {
                         'grid-column-end': item.columnNumber + item.columnSpan,
                         'grid-row-start': getGridRowStart(item, renderData)
                     }"
-                >
-                    <img
-                        :v-if="item.url"
-                        :src="item.url"
-                        :height="item.height"
-                        class="image"
-                    />
-                </div>
+                    v-html="item.renderContent({ ...item })"
+                ></div>
             </template>
         </div>
     </div>
 </template>
 
-<!-- v-observe-visibility="
-    (isVisible, entry) =>
-        visibilityChanged(isVisible, entry, prop.id)
-" -->
-
-<style scoped>
+<style>
 .grid {
     display: grid;
     align-items: center;
-    color: red;
     margin-bottom: 50px;
 }
 
