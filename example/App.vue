@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <img alt="Vue logo" src="./assets/logo.png" />
-        <VirtualGrid :updateFunction="pullData" :batchSize="batchSize" />
+        <VirtualGrid :updateFunction="pullData" />
     </div>
 </template>
 
@@ -21,13 +21,13 @@ import MapComponent from './components/Map.vue';
     },
 })
 export default class App extends Vue {
-    @Provide() private batchSize: number = 50;
+    @Provide() batchSize: number = 50;
 
-    private random(low: number, high: number) {
+    random(low: number, high: number) {
         return Math.floor(Math.random() * high) + low;
     }
 
-    private pullData(params: { batchSize: number; offset: number }): Item[] {
+    pullData(params: { offset: number }): Item[] {
         // This is to try when we reach end of infinite scroll (only 5 loads)
         if (params.offset > 5) {
             return [];
@@ -59,12 +59,12 @@ export default class App extends Vue {
         const sectionMap = params.offset === 0 ? [map] : [];
 
         // Populate random images (for the demo)
-        const randomImages = Array.from({ length: params.batchSize }, (_, index) => {
+        const randomImages = Array.from({ length: this.batchSize }, (_, index) => {
             const randSize = this.random(1, 2); // just to randomized which images can be big or not
 
             const width = 250 * randSize;
             const height = 250; // this can work with random height also
-            const id = index + params.offset * params.batchSize;
+            const id = index + params.offset * this.batchSize;
             return {
                 id: `img-${id}`,
                 title: `Image ${id}`,

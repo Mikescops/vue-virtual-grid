@@ -1,6 +1,6 @@
 {
-  "name": "@mikescops/vue-virtual-grid",
-  "version": "0.1.12",
+  "name": "vue-virtual-grid",
+  "version": "1.0.1",
   "author": "Corentin Mors <corentin@pixelswap.fr>",
   "source": "src/main.ts",
   "main": "./dist/virtual-grid.common.js",
@@ -11,7 +11,7 @@
     "serve:example": "vue-cli-service serve example/main.ts",
     "build:example": "vue-cli-service build example/main.ts --dest demo"
   },
-  "dependencies": {
+  "peerDependencies": {
     "vue": "^2.6.12"
   },
   "devDependencies": {
@@ -29,6 +29,7 @@
     "intersection-observer": "^0.11.0",
     "prettier": "^2.1.2",
     "typescript": "^4.0.3",
+    "vue": "^2.6.12",
     "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^9.0.2",
     "vue-template-compiler": "^2.6.12"
@@ -40,5 +41,27 @@
     "*.json",
     "*.js",
     "*.ts"
+  ],
+  "keywords": [
+    "vue",
+    "vuejs",
+    "grid",
+    "table",
+    "list",
+    "listview",
+    "virtual",
+    "scroll",
+    "scrolling",
+    "scrollable",
+    "window",
+    "windowing",
+    "columns",
+    "rows",
+    "image",
+    "content",
+    "typescript",
+    "ts",
+    "type",
+    "types"
   ]
 }

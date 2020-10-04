@@ -1,0 +1,6 @@
+.*ignore
+LICENSE
+package-lock.json
+dist/
+demo/
+.cache

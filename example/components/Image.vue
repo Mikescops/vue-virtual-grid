@@ -8,7 +8,7 @@ import { Item } from '../../src/types';
 
 @Component
 export default class ImageComponent extends Vue {
-    @Prop() private item: Item;
+    @Prop() item: Item;
 }
 </script>
 

@@ -45,12 +45,11 @@ interface RenderData {
 
 @Component
 export default class VirtualGrid extends Vue {
-    @Prop() updateFunction: (params: { batchSize: number; offset: number }) => Item[];
+    @Prop() updateFunction: (params: { offset: number }) => Item[];
 
     @ProvideReactive() items: Item[] = [];
     @ProvideReactive() content: Item[] = [];
 
-    @Prop() batchSize: number;
     @ProvideReactive() offset: number = 0;
     @ProvideReactive() bottomReached: boolean = false;
 
@@ -113,14 +112,10 @@ export default class VirtualGrid extends Vue {
         this.computeConfigData(this.containerData, this.items);
         this.computeLayoutData(this.configData);
         this.computeRenderData(this.configData, this.containerData, this.layoutData);
-        // console.log(
-        //     this.renderData.cellsToRender.length,
-        //     this.renderData.cellsToRender[this.renderData.cellsToRender.length - 1].id
-        // );
     }
 
     loadMoreData() {
-        const newItems = this.updateFunction({ batchSize: this.batchSize, offset: this.offset });
+        const newItems = this.updateFunction({ offset: this.offset });
         if (newItems.length === 0) {
             console.log('Bottom reached');
             this.bottomReached = true;

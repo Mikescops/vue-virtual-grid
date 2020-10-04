@@ -19,7 +19,7 @@ import { Item } from '../../src/types';
 
 @Component
 export default class MapComponent extends Vue {
-    @Prop() private item: Item;
+    @Prop() item: Item;
 }
 </script>
 

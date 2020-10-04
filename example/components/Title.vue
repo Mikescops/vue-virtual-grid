@@ -10,7 +10,7 @@ import { Item } from '../../src/types';
 
 @Component
 export default class TitleComponent extends Vue {
-    @Prop() private item: Item;
+    @Prop() item: Item;
 }
 </script>
 
