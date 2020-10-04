@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import { Item } from './GridList.vue';
+import { Item } from '../../src/types';
 
 @Component
 export default class TitleComponent extends Vue {
