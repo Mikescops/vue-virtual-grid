@@ -1,15 +1,10 @@
 <template>
-    <img
-        :src="item.url"
-        :title="item.title"
-        :style="{ height: item.height + 'px' }"
-        class="image"
-    />
+    <img :src="item.url" :title="item.title" :style="{ height: item.height + 'px' }" class="image" />
 </template>
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import { Item } from './GridList.vue';
+import { Item } from '../../src/types';
 
 @Component
 export default class ImageComponent extends Vue {
@@ -30,7 +25,7 @@ export default class ImageComponent extends Vue {
 .image:hover {
     z-index: 1;
     transform: scale(1.25);
-    box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2),
-        0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2), 0 24px 38px 3px rgba(0, 0, 0, 0.14),
+        0 9px 46px 8px rgba(0, 0, 0, 0.12);
 }
 </style>

@@ -1,16 +1,6 @@
 <script lang="ts">
 import { Prop, Component, Vue, ProvideReactive } from 'vue-property-decorator';
-
-export interface Item {
-    id: string;
-    title: string;
-    url: string;
-    width: number;
-    height: number;
-    columnSpan: number;
-    newRow?: boolean;
-    renderComponent: Vue.Component;
-}
+import { Item } from './types';
 
 interface ContainerData {
     windowSize: ElementSize;
@@ -54,8 +44,8 @@ interface RenderData {
 }
 
 @Component
-export default class GridList extends Vue {
-    @Prop() private updateFunction: (params: { batchSize: number; offset: number }) => Item[];
+export default class VirtualGrid extends Vue {
+    @Prop() updateFunction: (params: { batchSize: number; offset: number }) => Item[];
 
     @ProvideReactive() items: Item[] = [];
     @ProvideReactive() content: Item[] = [];
@@ -70,34 +60,34 @@ export default class GridList extends Vue {
         windowSize: { height: 0, width: 0 },
         windowScroll: { x: 0, y: 0 },
         elementWindowOffset: 0,
-        elementSize: { height: 0, width: 0 }
-    }
+        elementSize: { height: 0, width: 0 },
+    };
 
     @ProvideReactive() configData: ConfigData = {
         windowMargin: 0,
         gridGap: 0,
         columnCount: 1,
-        entries: []
-    }
+        entries: [],
+    };
 
     @ProvideReactive() layoutData: LayoutData = {
         totalHeight: 0,
-        cells: []
-    }
+        cells: [],
+    };
 
     @ProvideReactive() renderData: RenderData = {
         cellsToRender: [],
         firstRenderedRowNumber: 0,
-        firstRenderedRowOffset: 0
-    }
+        firstRenderedRowOffset: 0,
+    };
 
-    public created() {
+    created() {
         this.loadMoreData();
         window.addEventListener('resize', this.resize);
         window.addEventListener('scroll', this.scroll);
     }
 
-    public mounted() {
+    mounted() {
         this.ref = this.$refs.virtualGrid as Element;
         this.computeContainerData();
         this.computeConfigData(this.containerData, this.items);
@@ -105,19 +95,19 @@ export default class GridList extends Vue {
         this.computeRenderData(this.configData, this.containerData, this.layoutData);
     }
 
-    public beforeDestroy() {
+    beforeDestroy() {
         window.removeEventListener('resize', this.resize);
         window.removeEventListener('scroll', this.scroll);
     }
 
-    private resize() {
+    resize() {
         this.computeContainerData();
         this.computeConfigData(this.containerData, this.items);
         this.computeLayoutData(this.configData);
         this.computeRenderData(this.configData, this.containerData, this.layoutData);
     }
 
-    private scroll() {
+    scroll() {
         this.computeContainerData();
         this.computeInfiniteScroll(this.containerData);
         this.computeConfigData(this.containerData, this.items);
@@ -129,7 +119,7 @@ export default class GridList extends Vue {
         // );
     }
 
-    private loadMoreData() {
+    loadMoreData() {
         const newItems = this.updateFunction({ batchSize: this.batchSize, offset: this.offset });
         if (newItems.length === 0) {
             console.log('Bottom reached');
@@ -139,18 +129,20 @@ export default class GridList extends Vue {
         this.offset += 1;
     }
 
-    private computeInfiniteScroll(containerData: ContainerData) {
+    computeInfiniteScroll(containerData: ContainerData) {
         const windowTop = containerData.windowScroll.y;
         const windowBottom = windowTop + containerData.windowSize.height;
 
-        if (!this.bottomReached &&
-            windowBottom > containerData.elementWindowOffset + containerData.elementSize.height - 300) {
+        if (
+            !this.bottomReached &&
+            windowBottom > containerData.elementWindowOffset + containerData.elementSize.height - 300
+        ) {
             console.log('Loading next batch');
             this.loadMoreData();
         }
     }
 
-    private computeContainerData() {
+    computeContainerData() {
         const windowSize = this.getWindowSize();
         const windowScroll = this.getWindowScroll();
         const elementWindowOffset = this.getElementOffset(this.ref);
@@ -159,10 +151,8 @@ export default class GridList extends Vue {
         this.containerData = { windowSize, windowScroll, elementWindowOffset, elementSize };
     }
 
-    private computeConfigData(containerData: ContainerData, items: Item[]) {
-        const elementWidth = containerData.elementSize
-            ? containerData.elementSize.width
-            : null;
+    computeConfigData(containerData: ContainerData, items: Item[]) {
+        const elementWidth = containerData.elementSize ? containerData.elementSize.width : null;
 
         const windowMargin = this.getWindowMargin(containerData.windowSize.height);
 
@@ -172,17 +162,17 @@ export default class GridList extends Vue {
 
         const columnWidth = this.getColumnWidth(columnCount, gridGap, elementWidth);
 
-        const entries = items.map((item) => {
+        const entries = items.map(item => {
             // if the column span is 0 or negative we assume it is full width
             if (item.columnSpan < 1) {
                 item.columnSpan = columnCount;
             }
 
-            const imageWidth = (columnWidth * item.columnSpan) + (gridGap * (item.columnSpan - 1));
+            const imageWidth = columnWidth * item.columnSpan + gridGap * (item.columnSpan - 1);
             return {
                 ...item,
                 height: this.getItemRatioHeight(item.height, item.width, imageWidth),
-                width: imageWidth
+                width: imageWidth,
             };
         });
 
@@ -190,14 +180,14 @@ export default class GridList extends Vue {
             windowMargin,
             gridGap,
             columnCount,
-            entries
+            entries,
         };
     }
 
-    private computeLayoutData(configData: ConfigData) {
+    computeLayoutData(configData: ConfigData) {
         if (configData === null) {
             return;
-        };
+        }
 
         let currentRowNumber = 1;
         let prevRowsTotalHeight = 0;
@@ -206,7 +196,7 @@ export default class GridList extends Vue {
         let columnShift = 0;
 
         const cells: Cell[] = configData.entries.map((entry, index) => {
-            const distanceToRowStart = (index + columnShift) % (configData.columnCount);
+            const distanceToRowStart = (index + columnShift) % configData.columnCount;
             if (entry.newRow && distanceToRowStart !== 0) {
                 columnShift += configData.columnCount - distanceToRowStart;
             }
@@ -248,10 +238,10 @@ export default class GridList extends Vue {
         this.layoutData = { cells, totalHeight };
     }
 
-    private computeRenderData(configData: ConfigData, containerData: ContainerData, layoutData: LayoutData) {
+    computeRenderData(configData: ConfigData, containerData: ContainerData, layoutData: LayoutData) {
         if (layoutData === null || configData === null) {
             return;
-        };
+        }
         const cellsToRender: Cell[] = [];
         let firstRenderedRowNumber: null | number = null;
         let firstRenderedRowOffset: null | number = null;
@@ -271,10 +261,10 @@ export default class GridList extends Vue {
 
                 if (cellTop > renderBottom) {
                     continue;
-                };
+                }
                 if (cellBottom < renderTop) {
                     continue;
-                };
+                }
 
                 if (firstRenderedRowNumber === null) {
                     firstRenderedRowNumber = cell.rowNumber;
@@ -295,11 +285,7 @@ export default class GridList extends Vue {
 
     /** Grid utils */
 
-    private getColumnWidth(
-        columnCount: number | null,
-        gridGap: number | null,
-        elementWidth: number | null,
-    ) {
+    getColumnWidth(columnCount: number | null, gridGap: number | null, elementWidth: number | null) {
         if (columnCount === null || gridGap === null || elementWidth === null) {
             return null;
         }
@@ -310,18 +296,12 @@ export default class GridList extends Vue {
         return columnWidth;
     }
 
-    private getGridRowStart(
-        cell: Cell,
-        renderData: RenderData | null,
-    ) {
+    getGridRowStart(cell: Cell, renderData: RenderData | null) {
         if (renderData === null) {
             return undefined;
-        };
+        }
 
-        const offset =
-            renderData.firstRenderedRowNumber !== null
-                ? renderData.firstRenderedRowNumber - 1
-                : 0;
+        const offset = renderData.firstRenderedRowNumber !== null ? renderData.firstRenderedRowNumber - 1 : 0;
         const gridRowStart = cell.rowNumber - offset;
 
         return `${gridRowStart}`;
@@ -329,18 +309,18 @@ export default class GridList extends Vue {
 
     /** UTILS */
 
-    private isSameElementSize(a: ElementSize, b: ElementSize) {
+    isSameElementSize(a: ElementSize, b: ElementSize) {
         return a.width === b.width && a.height === b.height;
     }
 
-    private getWindowSize(): ElementSize {
+    getWindowSize(): ElementSize {
         return {
             width: window.innerWidth,
             height: window.innerHeight,
         };
     }
 
-    private getElementSize(element: Element): ElementSize {
+    getElementSize(element: Element): ElementSize {
         const rect = element.getBoundingClientRect();
         return {
             width: rect.width,
@@ -348,24 +328,24 @@ export default class GridList extends Vue {
         };
     }
 
-    private isSameElementScroll(a: ElementScroll, b: ElementScroll) {
+    isSameElementScroll(a: ElementScroll, b: ElementScroll) {
         return a.x === b.x && a.y === b.y;
     }
 
-    private getWindowScroll(): ElementScroll {
+    getWindowScroll(): ElementScroll {
         return {
             x: window.scrollX,
             y: window.scrollY,
         };
     }
 
-    private getElementOffset(element: Element) {
+    getElementOffset(element: Element) {
         return window.scrollY + element.getBoundingClientRect().top;
     }
 
     /** Custom utils */
 
-    private getGridGap(elementWidth: number, windowHeight: number) {
+    getGridGap(elementWidth: number, windowHeight: number) {
         if (elementWidth > 720 && windowHeight > 480) {
             return 10;
         } else {
@@ -373,15 +353,15 @@ export default class GridList extends Vue {
         }
     }
 
-    private getColumnCount(elementWidth: number) {
+    getColumnCount(elementWidth: number) {
         return Math.floor(elementWidth / 250);
     }
 
-    private getWindowMargin(windowHeight: number) {
+    getWindowMargin(windowHeight: number) {
         return Math.round(windowHeight * 1.5);
     }
 
-    private getItemRatioHeight(height: number, width: number, columnWidth: number) {
+    getItemRatioHeight(height: number, width: number, columnWidth: number) {
         const imageRatio = height / width;
         return Math.round(columnWidth * imageRatio);
     }
@@ -396,35 +376,30 @@ export default class GridList extends Vue {
             boxSizing: 'border-box',
             height: `${layoutData.totalHeight}px`,
             paddingTop:
-                renderData !== null &&
-                renderData.firstRenderedRowOffset !== null
+                renderData !== null && renderData.firstRenderedRowOffset !== null
                     ? `${renderData.firstRenderedRowOffset}px`
-                    : '0px'
+                    : '0px',
         }"
     >
         <div
             class="grid"
             :style="{
                 'grid-template-columns': `repeat(${configData.columnCount}, 1fr)`,
-                gap: `${configData.gridGap}px`
+                'gap': `${configData.gridGap}px`,
             }"
         >
-            <template v-for="item in renderData.cellsToRender">
-                <div
-                    :key="item.id"
-                    :style="{
-                        height: item.height,
-                        'grid-column-start': item.columnNumber,
-                        'grid-column-end': item.columnNumber + item.columnSpan,
-                        'grid-row-start': getGridRowStart(item, renderData)
-                    }"
-                >
-                    <component
-                        :is="item.renderComponent"
-                        :item="item"
-                    ></component>
-                </div>
-            </template>
+            <div
+                v-for="item in renderData.cellsToRender"
+                :key="item.id"
+                :style="{
+                    'height': item.height,
+                    'grid-column-start': item.columnNumber,
+                    'grid-column-end': item.columnNumber + item.columnSpan,
+                    'grid-row-start': getGridRowStart(item, renderData),
+                }"
+            >
+                <component :is="item.renderComponent" :item="item"></component>
+            </div>
         </div>
     </div>
 </template>

@@ -1,13 +1,14 @@
 <template>
     <div id="app">
         <img alt="Vue logo" src="./assets/logo.png" />
-        <GridList :updateFunction="pullData" :batchSize="batchSize" />
+        <VirtualGrid :updateFunction="pullData" :batchSize="batchSize" />
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Provide, Vue } from 'vue-property-decorator';
-import * as GridList from './components/GridList.vue';
+import VirtualGrid from '../src/VirtualGrid.vue';
+import { Item } from '../src/types';
 
 // Custom components to render
 import ImageComponent from './components/Image.vue';
@@ -16,8 +17,8 @@ import MapComponent from './components/Map.vue';
 
 @Component({
     components: {
-        GridList: GridList.default
-    }
+        VirtualGrid: VirtualGrid,
+    },
 })
 export default class App extends Vue {
     @Provide() private batchSize: number = 50;
@@ -26,7 +27,7 @@ export default class App extends Vue {
         return Math.floor(Math.random() * high) + low;
     }
 
-    private pullData(params: { batchSize: number; offset: number }): GridList.Item[] {
+    private pullData(params: { batchSize: number; offset: number }): Item[] {
         // This is to try when we reach end of infinite scroll (only 5 loads)
         if (params.offset > 5) {
             return [];
@@ -41,11 +42,11 @@ export default class App extends Vue {
             height: 250,
             columnSpan: 2,
             newRow: true,
-            renderComponent: TitleComponent
+            renderComponent: TitleComponent,
         };
 
         // Add a map sometimes (to test iframes)
-        const sectionMap = this.random(1, 4) === 1 ? [{
+        const map = {
             id: `map-${params.offset}`,
             title: '',
             url: '-11.18408203125%2C39.2832938689385%2C17.819824218750004%2C52.77618568896171',
@@ -53,8 +54,9 @@ export default class App extends Vue {
             height: 200,
             columnSpan: 0,
             newRow: true,
-            renderComponent: MapComponent
-        }] : [];
+            renderComponent: MapComponent,
+        };
+        const sectionMap = params.offset === 0 ? [map] : [];
 
         // Populate random images (for the demo)
         const randomImages = Array.from({ length: params.batchSize }, (_, index) => {
@@ -62,7 +64,7 @@ export default class App extends Vue {
 
             const width = 250 * randSize;
             const height = 250; // this can work with random height also
-            const id = index + (params.offset * params.batchSize);
+            const id = index + params.offset * params.batchSize;
             return {
                 id: `img-${id}`,
                 title: `Image ${id}`,
@@ -70,7 +72,7 @@ export default class App extends Vue {
                 width,
                 height,
                 columnSpan: randSize,
-                renderComponent: ImageComponent
+                renderComponent: ImageComponent,
             };
         });
 

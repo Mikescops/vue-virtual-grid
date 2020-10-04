@@ -7,11 +7,7 @@
             scrolling="no"
             marginheight="0"
             marginwidth="0"
-            :src="
-                'https://www.openstreetmap.org/export/embed.html?bbox=' +
-                    item.url +
-                    '&amp;layer=mapnik'
-            "
+            :src="'https://www.openstreetmap.org/export/embed.html?bbox=' + item.url + '&amp;layer=mapnik'"
             style="border: 1px solid black"
         ></iframe>
     </div>
@@ -19,7 +15,7 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import { Item } from './GridList.vue';
+import { Item } from '../../src/types';
 
 @Component
 export default class MapComponent extends Vue {
