@@ -29,10 +29,10 @@ export default class App extends Vue {
         return Math.floor(Math.random() * high) + low;
     }
 
-    pullData(params: { offset: number }): Item<CustomDataTypes>[] {
+    pullData(params: { offset: number }): Promise<Item<CustomDataTypes>[]> {
         // This is to try when we reach end of infinite scroll (only 5 loads)
         if (params.offset > 5) {
-            return [];
+            return Promise.resolve([]);
         }
 
         // Add a title at each section
@@ -82,7 +82,7 @@ export default class App extends Vue {
             };
         });
 
-        return [sectionTitle, ...randomImages, ...sectionMap];
+        return Promise.resolve([sectionTitle, ...randomImages, ...sectionMap]);
     }
 }
 </script>

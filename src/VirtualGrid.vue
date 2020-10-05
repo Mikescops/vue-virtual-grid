@@ -46,7 +46,9 @@ interface RenderData<P> {
 
 @Component
 export default class VirtualGrid<P> extends Vue {
-    @Prop({ default: () => (): Item<unknown>[] => [] }) updateFunction: (params: { offset: number }) => Item<P>[];
+    @Prop({ default: () => (): Item<unknown>[] => [] }) updateFunction: (params: {
+        offset: number;
+    }) => Promise<Item<P>[]>;
     @Prop({ default: () => getGridGapDefault }) getGridGap: (elementWidth: number, windowHeight: number) => number;
     @Prop({ default: () => getColumnCountDefault }) getColumnCount: (elementWidth: number) => number;
     @Prop({ default: () => getWindowMarginDefault }) getWindowMargin: (windowHeight: number) => number;
@@ -55,6 +57,8 @@ export default class VirtualGrid<P> extends Vue {
         width: number,
         columnWidth: number
     ) => number;
+
+    @ProvideReactive() updateLock: boolean = false;
 
     @ProvideReactive() items: Item<P>[] = [];
 
@@ -89,17 +93,22 @@ export default class VirtualGrid<P> extends Vue {
     };
 
     created() {
-        this.loadMoreData();
-        window.addEventListener('resize', this.resize);
-        window.addEventListener('scroll', this.scroll);
-    }
+        this.loadMoreData()
+            .catch((error) => {
+                if (error) {
+                    console.error('Failed to load initial data', error);
+                }
+            })
+            .then(() => {
+                this.ref = this.$refs.virtualGrid as Element;
+                this.computeContainerData();
+                this.computeConfigData(this.containerData, this.items);
+                this.computeLayoutData(this.configData);
+                this.computeRenderData(this.configData, this.containerData, this.layoutData);
 
-    mounted() {
-        this.ref = this.$refs.virtualGrid as Element;
-        this.computeContainerData();
-        this.computeConfigData(this.containerData, this.items);
-        this.computeLayoutData(this.configData);
-        this.computeRenderData(this.configData, this.containerData, this.layoutData);
+                window.addEventListener('resize', this.resize);
+                window.addEventListener('scroll', this.scroll);
+            });
     }
 
     beforeDestroy() {
@@ -116,20 +125,36 @@ export default class VirtualGrid<P> extends Vue {
 
     scroll() {
         this.computeContainerData();
-        this.computeInfiniteScroll(this.containerData);
-        this.computeConfigData(this.containerData, this.items);
-        this.computeLayoutData(this.configData);
-        this.computeRenderData(this.configData, this.containerData, this.layoutData);
+        this.computeInfiniteScroll(this.containerData)
+            .catch((error) => {
+                if (error) {
+                    console.error('Fail to load next data batch', error);
+                }
+            })
+            .then(() => {
+                this.computeConfigData(this.containerData, this.items);
+                this.computeLayoutData(this.configData);
+                this.computeRenderData(this.configData, this.containerData, this.layoutData);
+            });
     }
 
-    loadMoreData() {
-        const newItems = this.updateFunction({ offset: this.offset });
+    async loadMoreData() {
+        if (this.updateLock) {
+            return Promise.resolve();
+        }
+        this.updateLock = true;
+        const newItems = await this.updateFunction({ offset: this.offset });
+        console.log(newItems);
         if (newItems.length === 0) {
             console.log('Bottom reached');
             this.bottomReached = true;
+            return Promise.resolve();
         }
+
         this.items = [...this.items, ...newItems];
         this.offset += 1;
+        this.updateLock = false;
+        return Promise.resolve();
     }
 
     computeInfiniteScroll(containerData: ContainerData) {
@@ -138,11 +163,12 @@ export default class VirtualGrid<P> extends Vue {
 
         if (
             !this.bottomReached &&
-            windowBottom > containerData.elementWindowOffset + containerData.elementSize.height - 300
+            windowBottom > containerData.elementWindowOffset + containerData.elementSize.height - 500
         ) {
             console.log('Loading next batch');
-            this.loadMoreData();
+            return this.loadMoreData();
         }
+        return Promise.resolve();
     }
 
     computeContainerData() {
