@@ -1,5 +1,6 @@
 <script lang="ts">
 import { Prop, Component, Vue, ProvideReactive } from 'vue-property-decorator';
+import { getGridGapDefault, getColumnCountDefault, getWindowMarginDefault, getItemRatioHeightDefault } from './utils';
 import { Item } from './types';
 
 interface ContainerData {
@@ -45,7 +46,15 @@ interface RenderData {
 
 @Component
 export default class VirtualGrid extends Vue {
-    @Prop() updateFunction: (params: { offset: number }) => Item[];
+    @Prop({ default: () => (): Item[] => [] }) updateFunction: (params: { offset: number }) => Item[];
+    @Prop({ default: () => getGridGapDefault }) getGridGap: (elementWidth: number, windowHeight: number) => number;
+    @Prop({ default: () => getColumnCountDefault }) getColumnCount: (elementWidth: number) => number;
+    @Prop({ default: () => getWindowMarginDefault }) getWindowMargin: (windowHeight: number) => number;
+    @Prop({ default: () => getItemRatioHeightDefault }) getItemRatioHeight: (
+        height: number,
+        width: number,
+        columnWidth: number
+    ) => number;
 
     @ProvideReactive() items: Item[] = [];
     @ProvideReactive() content: Item[] = [];
@@ -157,7 +166,7 @@ export default class VirtualGrid extends Vue {
 
         const columnWidth = this.getColumnWidth(columnCount, gridGap, elementWidth);
 
-        const entries = items.map(item => {
+        const entries = items.map((item) => {
             // if the column span is 0 or negative we assume it is full width
             if (item.columnSpan < 1) {
                 item.columnSpan = columnCount;
@@ -337,29 +346,6 @@ export default class VirtualGrid extends Vue {
     getElementOffset(element: Element) {
         return window.scrollY + element.getBoundingClientRect().top;
     }
-
-    /** Custom utils */
-
-    getGridGap(elementWidth: number, windowHeight: number) {
-        if (elementWidth > 720 && windowHeight > 480) {
-            return 10;
-        } else {
-            return 5;
-        }
-    }
-
-    getColumnCount(elementWidth: number) {
-        return Math.floor(elementWidth / 250);
-    }
-
-    getWindowMargin(windowHeight: number) {
-        return Math.round(windowHeight * 1.5);
-    }
-
-    getItemRatioHeight(height: number, width: number, columnWidth: number) {
-        const imageRatio = height / width;
-        return Math.round(columnWidth * imageRatio);
-    }
 }
 </script>
 
@@ -403,6 +389,5 @@ export default class VirtualGrid extends Vue {
 .grid {
     display: grid;
     align-items: center;
-    margin-bottom: 50px;
 }
 </style>
