@@ -45,8 +45,8 @@ interface RenderData<P> {
 }
 
 @Component
-export default class VirtualGrid extends Vue {
-    @Prop({ default: () => (): Item<unknown>[] => [] }) updateFunction: <P>(params: { offset: number }) => Item<P>[];
+export default class VirtualGrid<P> extends Vue {
+    @Prop({ default: () => (): Item<unknown>[] => [] }) updateFunction: (params: { offset: number }) => Item<P>[];
     @Prop({ default: () => getGridGapDefault }) getGridGap: (elementWidth: number, windowHeight: number) => number;
     @Prop({ default: () => getColumnCountDefault }) getColumnCount: (elementWidth: number) => number;
     @Prop({ default: () => getWindowMarginDefault }) getWindowMargin: (windowHeight: number) => number;
@@ -56,7 +56,7 @@ export default class VirtualGrid extends Vue {
         columnWidth: number
     ) => number;
 
-    @ProvideReactive() items: Item<unknown>[] = [];
+    @ProvideReactive() items: Item<P>[] = [];
 
     @ProvideReactive() offset: number = 0;
     @ProvideReactive() bottomReached: boolean = false;
@@ -70,19 +70,19 @@ export default class VirtualGrid extends Vue {
         elementSize: { height: 0, width: 0 },
     };
 
-    @ProvideReactive() configData: ConfigData<unknown> = {
+    @ProvideReactive() configData: ConfigData<P> = {
         windowMargin: 0,
         gridGap: 0,
         columnCount: 1,
         entries: [],
     };
 
-    @ProvideReactive() layoutData: LayoutData<unknown> = {
+    @ProvideReactive() layoutData: LayoutData<P> = {
         totalHeight: 0,
         cells: [],
     };
 
-    @ProvideReactive() renderData: RenderData<unknown> = {
+    @ProvideReactive() renderData: RenderData<P> = {
         cellsToRender: [],
         firstRenderedRowNumber: 0,
         firstRenderedRowOffset: 0,
@@ -154,7 +154,7 @@ export default class VirtualGrid extends Vue {
         this.containerData = { windowSize, windowScroll, elementWindowOffset, elementSize };
     }
 
-    computeConfigData<P>(containerData: ContainerData, items: Item<P>[]) {
+    computeConfigData(containerData: ContainerData, items: Item<P>[]) {
         const elementWidth = containerData.elementSize ? containerData.elementSize.width : null;
 
         const windowMargin = this.getWindowMargin(containerData.windowSize.height);
@@ -187,7 +187,7 @@ export default class VirtualGrid extends Vue {
         };
     }
 
-    computeLayoutData<P>(configData: ConfigData<P>) {
+    computeLayoutData(configData: ConfigData<P>) {
         if (configData === null) {
             return;
         }
@@ -241,7 +241,7 @@ export default class VirtualGrid extends Vue {
         this.layoutData = { cells, totalHeight };
     }
 
-    computeRenderData<P>(configData: ConfigData<P>, containerData: ContainerData, layoutData: LayoutData<P>) {
+    computeRenderData(configData: ConfigData<P>, containerData: ContainerData, layoutData: LayoutData<P>) {
         if (layoutData === null || configData === null) {
             return;
         }
@@ -299,7 +299,7 @@ export default class VirtualGrid extends Vue {
         return columnWidth;
     }
 
-    getGridRowStart<P>(cell: Cell<P>, renderData: RenderData<P> | null) {
+    getGridRowStart(cell: Cell<P>, renderData: RenderData<P> | null) {
         if (renderData === null) {
             return undefined;
         }
