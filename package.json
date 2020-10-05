@@ -1,6 +1,6 @@
 {
   "name": "vue-virtual-grid",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "author": "Corentin Mors <corentin@pixelswap.fr>",
   "license": "MIT",
   "repository": "github:mikescops/vue-virtual-grid",
@@ -28,7 +28,7 @@
     "@vue/eslint-config-typescript": "^5.1.0",
     "eslint": "^7.10.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-vue": "^7.0.0",
+    "eslint-plugin-vue": "^7.0.1",
     "intersection-observer": "^0.11.0",
     "prettier": "^2.1.2",
     "typescript": "^4.0.3",
