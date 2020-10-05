@@ -1,6 +1,6 @@
 <template>
     <div class="title" :style="{ height: `${item.height}px` }">
-        <h2>{{ item.title }}</h2>
+        <h2>{{ item.injected.title }}</h2>
     </div>
 </template>
 
@@ -8,9 +8,13 @@
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Item } from '../../src/types';
 
+export interface Title {
+    title: string;
+}
+
 @Component
 export default class TitleComponent extends Vue {
-    @Prop() item: Item;
+    @Prop() item: Item<Title>;
 }
 </script>
 

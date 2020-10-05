@@ -20,33 +20,33 @@ interface ElementScroll {
     y: number;
 }
 
-interface ConfigData {
+interface ConfigData<P> {
     windowMargin: number;
     gridGap: number;
     columnCount: number;
-    entries: Item[];
+    entries: Item<P>[];
 }
 
-interface Cell extends Item {
+interface Cell<P> extends Item<P> {
     columnNumber: number;
     rowNumber: number;
     offset: number;
 }
 
-interface LayoutData {
+interface LayoutData<P> {
     totalHeight: number;
-    cells: Cell[];
+    cells: Cell<P>[];
 }
 
-interface RenderData {
-    cellsToRender: Cell[];
+interface RenderData<P> {
+    cellsToRender: Cell<P>[];
     firstRenderedRowNumber: number;
     firstRenderedRowOffset: number;
 }
 
 @Component
 export default class VirtualGrid extends Vue {
-    @Prop({ default: () => (): Item[] => [] }) updateFunction: (params: { offset: number }) => Item[];
+    @Prop({ default: () => (): Item<unknown>[] => [] }) updateFunction: <P>(params: { offset: number }) => Item<P>[];
     @Prop({ default: () => getGridGapDefault }) getGridGap: (elementWidth: number, windowHeight: number) => number;
     @Prop({ default: () => getColumnCountDefault }) getColumnCount: (elementWidth: number) => number;
     @Prop({ default: () => getWindowMarginDefault }) getWindowMargin: (windowHeight: number) => number;
@@ -56,8 +56,7 @@ export default class VirtualGrid extends Vue {
         columnWidth: number
     ) => number;
 
-    @ProvideReactive() items: Item[] = [];
-    @ProvideReactive() content: Item[] = [];
+    @ProvideReactive() items: Item<unknown>[] = [];
 
     @ProvideReactive() offset: number = 0;
     @ProvideReactive() bottomReached: boolean = false;
@@ -71,19 +70,19 @@ export default class VirtualGrid extends Vue {
         elementSize: { height: 0, width: 0 },
     };
 
-    @ProvideReactive() configData: ConfigData = {
+    @ProvideReactive() configData: ConfigData<unknown> = {
         windowMargin: 0,
         gridGap: 0,
         columnCount: 1,
         entries: [],
     };
 
-    @ProvideReactive() layoutData: LayoutData = {
+    @ProvideReactive() layoutData: LayoutData<unknown> = {
         totalHeight: 0,
         cells: [],
     };
 
-    @ProvideReactive() renderData: RenderData = {
+    @ProvideReactive() renderData: RenderData<unknown> = {
         cellsToRender: [],
         firstRenderedRowNumber: 0,
         firstRenderedRowOffset: 0,
@@ -155,7 +154,7 @@ export default class VirtualGrid extends Vue {
         this.containerData = { windowSize, windowScroll, elementWindowOffset, elementSize };
     }
 
-    computeConfigData(containerData: ContainerData, items: Item[]) {
+    computeConfigData<P>(containerData: ContainerData, items: Item<P>[]) {
         const elementWidth = containerData.elementSize ? containerData.elementSize.width : null;
 
         const windowMargin = this.getWindowMargin(containerData.windowSize.height);
@@ -188,7 +187,7 @@ export default class VirtualGrid extends Vue {
         };
     }
 
-    computeLayoutData(configData: ConfigData) {
+    computeLayoutData<P>(configData: ConfigData<P>) {
         if (configData === null) {
             return;
         }
@@ -199,7 +198,7 @@ export default class VirtualGrid extends Vue {
 
         let columnShift = 0;
 
-        const cells: Cell[] = configData.entries.map((entry, index) => {
+        const cells: Cell<P>[] = configData.entries.map((entry, index) => {
             const distanceToRowStart = (index + columnShift) % configData.columnCount;
             if (entry.newRow && distanceToRowStart !== 0) {
                 columnShift += configData.columnCount - distanceToRowStart;
@@ -242,11 +241,11 @@ export default class VirtualGrid extends Vue {
         this.layoutData = { cells, totalHeight };
     }
 
-    computeRenderData(configData: ConfigData, containerData: ContainerData, layoutData: LayoutData) {
+    computeRenderData<P>(configData: ConfigData<P>, containerData: ContainerData, layoutData: LayoutData<P>) {
         if (layoutData === null || configData === null) {
             return;
         }
-        const cellsToRender: Cell[] = [];
+        const cellsToRender: Cell<P>[] = [];
         let firstRenderedRowNumber: null | number = null;
         let firstRenderedRowOffset: null | number = null;
 
@@ -300,7 +299,7 @@ export default class VirtualGrid extends Vue {
         return columnWidth;
     }
 
-    getGridRowStart(cell: Cell, renderData: RenderData | null) {
+    getGridRowStart<P>(cell: Cell<P>, renderData: RenderData<P> | null) {
         if (renderData === null) {
             return undefined;
         }

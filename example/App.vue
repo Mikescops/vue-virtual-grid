@@ -11,9 +11,11 @@ import VirtualGrid from '../src/VirtualGrid.vue';
 import { Item } from '../src/types';
 
 // Custom components to render
-import ImageComponent from './components/Image.vue';
-import TitleComponent from './components/Title.vue';
-import MapComponent from './components/Map.vue';
+import * as ImageComponent from './components/Image.vue';
+import * as TitleComponent from './components/Title.vue';
+import * as MapComponent from './components/Map.vue';
+
+type CustomDataTypes = ImageComponent.Image | TitleComponent.Title | MapComponent.Map;
 
 @Component({
     components: {
@@ -27,7 +29,7 @@ export default class App extends Vue {
         return Math.floor(Math.random() * high) + low;
     }
 
-    pullData(params: { offset: number }): Item[] {
+    pullData(params: { offset: number }): Item<CustomDataTypes>[] {
         // This is to try when we reach end of infinite scroll (only 5 loads)
         if (params.offset > 5) {
             return [];
@@ -36,25 +38,27 @@ export default class App extends Vue {
         // Add a title at each section
         const sectionTitle = {
             id: `title-${params.offset}`,
-            title: `Welcome to section ${params.offset}`,
-            url: '',
+            injected: {
+                title: `Welcome to section ${params.offset}`,
+            },
             width: 500,
             height: 250,
             columnSpan: 2,
             newRow: true,
-            renderComponent: TitleComponent,
+            renderComponent: TitleComponent.default,
         };
 
         // Add a map sometimes (to test iframes)
         const map = {
             id: `map-${params.offset}`,
-            title: '',
-            url: '-11.18408203125%2C39.2832938689385%2C17.819824218750004%2C52.77618568896171',
+            injected: {
+                coordinates: '-11.18408203125%2C39.2832938689385%2C17.819824218750004%2C52.77618568896171',
+            },
             width: 1000,
             height: 200,
             columnSpan: 0,
             newRow: true,
-            renderComponent: MapComponent,
+            renderComponent: MapComponent.default,
         };
         const sectionMap = params.offset === 0 ? [map] : [];
 
@@ -67,12 +71,14 @@ export default class App extends Vue {
             const id = index + params.offset * this.batchSize;
             return {
                 id: `img-${id}`,
-                title: `Image ${id}`,
-                url: `https://picsum.photos/id/${id + 1}/${width}/${height}.jpg`,
+                injected: {
+                    alt: `Image ${id}`,
+                    url: `https://picsum.photos/id/${id + 1}/${width}/${height}.jpg`,
+                },
                 width,
                 height,
                 columnSpan: randSize,
-                renderComponent: ImageComponent,
+                renderComponent: ImageComponent.default,
             };
         });
 

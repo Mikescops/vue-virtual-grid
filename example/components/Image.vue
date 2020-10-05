@@ -1,14 +1,19 @@
 <template>
-    <img :src="item.url" :title="item.title" :style="{ height: item.height + 'px' }" class="image" />
+    <img :src="item.injected.url" :title="item.injected.alt" :style="{ height: item.height + 'px' }" class="image" />
 </template>
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Item } from '../../src/types';
 
+export interface Image {
+    alt: string;
+    url: string;
+}
+
 @Component
 export default class ImageComponent extends Vue {
-    @Prop() item: Item;
+    @Prop() item: Item<Image>;
 }
 </script>
 

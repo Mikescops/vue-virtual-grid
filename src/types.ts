@@ -1,9 +1,8 @@
 import { Component } from 'vue';
 
-export interface Item {
+export interface Item<P> {
     id: string;
-    title: string;
-    url: string;
+    injected?: P;
     width: number;
     height: number;
     columnSpan: number;

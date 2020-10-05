@@ -7,7 +7,11 @@
             scrolling="no"
             marginheight="0"
             marginwidth="0"
-            :src="'https://www.openstreetmap.org/export/embed.html?bbox=' + item.url + '&amp;layer=mapnik'"
+            :src="
+                'https://www.openstreetmap.org/export/embed.html?bbox=' +
+                item.injected.coordinates +
+                '&amp;layer=mapnik'
+            "
             style="border: 1px solid black"
         ></iframe>
     </div>
@@ -17,9 +21,13 @@
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { Item } from '../../src/types';
 
+export interface Map {
+    coordinates: string;
+}
+
 @Component
 export default class MapComponent extends Vue {
-    @Prop() item: Item;
+    @Prop() item: Item<Map>;
 }
 </script>
 

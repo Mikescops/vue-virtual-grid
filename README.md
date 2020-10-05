@@ -42,7 +42,7 @@ In your template you can add:
 <VirtualGrid :updateFunction="yourGetDataFunction" />
 ```
 
-The VirtualGrid takes multiple custom function as properties
+The `VirtualGrid` takes multiple custom function as properties
 
 -   `updateFunction`:
     A function that will populate the grid, constructor is the following `updateFunction(params: { offset: number }) => VirtualGrid.Item[]`.
@@ -56,15 +56,14 @@ The VirtualGrid takes multiple custom function as properties
 -   `getWindowMargin`:
     A function that provides a way to compute ratio height/width depending on the display (by default it preserves ratio), constructor is the following `getItemRatioHeight(height: number, width: number, columnWidth: number) => number;`.
 
-Properties have all defaults that you can use or get inspired from in `src/utils.ts`.
+Properties are provided with default functions that you can use or get inspired from in `src/utils.ts`.
 
 The function `updateFunction` should return a list of items that will be rendered, each item should look like this object:
 
 ```js
 {
-    id: string, // binding id
-    title: string, // custom param1
-    url: string, // custom param2
+    id: string, // binding id (must be unique)
+    injected?: string, // custom param, pass an object with what you want inside (optional)
     width: number, // original width of the item
     height: number, // original height of the item
     columnSpan: number, // how many columns will use your item (put 0 if you want the full width)
@@ -73,21 +72,28 @@ The function `updateFunction` should return a list of items that will be rendere
 }
 ```
 
-The properties `title` and `url` does not impact the computation, they are here to pass custom data to the final component.
+The property `injected` does not impact the computation, it is here to pass custom data to the final component.
 
 In the returned object to your `renderComponent` the height and width properties will be recomputed depending on the column size. It will always keep the original ratio.
 
 ### Typescript support
 
-If you're using typescript you can import typing for Item:
+If you're using Typescript you can import typing for `Item` and provide custom typing for injected data:
 
 ```ts
 import { Item } from 'vue-virtual-grid';
+
+interface Image {
+    alt: string;
+    url: string;
+}
+
+const item: Item<Image>;
 ```
 
 ### Live example
 
-If you want a live example, you can take a look at the demo and check the corresponding code in `example/`.
+If you want a live example, you can take a look at the demo (link at the top) and check the corresponding code in `example/`.
 
 ## Contribute
 
