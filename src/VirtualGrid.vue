@@ -74,25 +74,21 @@ export default class VirtualGrid<P> extends Vue {
         elementSize: { height: 0, width: 0 },
     };
 
-    @ProvideReactive() configData: ConfigData<P> = {
-        windowMargin: 0,
-        gridGap: 0,
-        columnCount: 1,
-        entries: [],
-    };
+    get configData() {
+        return this.computeConfigData(this.containerData, this.items);
+    }
 
-    @ProvideReactive() layoutData: LayoutData<P> = {
-        totalHeight: 0,
-        cells: [],
-    };
+    get layoutData() {
+        return this.computeLayoutData(this.configData);
+    }
 
-    @ProvideReactive() renderData: RenderData<P> = {
-        cellsToRender: [],
-        firstRenderedRowNumber: 0,
-        firstRenderedRowOffset: 0,
-    };
+    get renderData() {
+        return this.computeRenderData(this.configData, this.containerData, this.layoutData);
+    }
 
     created() {
+        window.addEventListener('resize', this.resize);
+        window.addEventListener('scroll', this.scroll);
         this.loadMoreData()
             .catch((error) => {
                 if (error) {
@@ -102,12 +98,6 @@ export default class VirtualGrid<P> extends Vue {
             .then(() => {
                 this.ref = this.$refs.virtualGrid as Element;
                 this.computeContainerData();
-                this.computeConfigData(this.containerData, this.items);
-                this.computeLayoutData(this.configData);
-                this.computeRenderData(this.configData, this.containerData, this.layoutData);
-
-                window.addEventListener('resize', this.resize);
-                window.addEventListener('scroll', this.scroll);
             });
     }
 
@@ -118,9 +108,6 @@ export default class VirtualGrid<P> extends Vue {
 
     resize() {
         this.computeContainerData();
-        this.computeConfigData(this.containerData, this.items);
-        this.computeLayoutData(this.configData);
-        this.computeRenderData(this.configData, this.containerData, this.layoutData);
     }
 
     scroll() {
@@ -131,11 +118,7 @@ export default class VirtualGrid<P> extends Vue {
                     console.error('Fail to load next data batch', error);
                 }
             })
-            .then(() => {
-                this.computeConfigData(this.containerData, this.items);
-                this.computeLayoutData(this.configData);
-                this.computeRenderData(this.configData, this.containerData, this.layoutData);
-            });
+            .then();
     }
 
     async loadMoreData() {
@@ -144,7 +127,7 @@ export default class VirtualGrid<P> extends Vue {
         }
         this.updateLock = true;
         const newItems = await this.updateFunction({ offset: this.offset });
-        console.log(newItems);
+
         if (newItems.length === 0) {
             console.log('Bottom reached');
             this.bottomReached = true;
@@ -172,6 +155,10 @@ export default class VirtualGrid<P> extends Vue {
     }
 
     computeContainerData() {
+        if (this.ref === null) {
+            return;
+        }
+
         const windowSize = this.getWindowSize();
         const windowScroll = this.getWindowScroll();
         const elementWindowOffset = this.getElementOffset(this.ref);
@@ -180,7 +167,16 @@ export default class VirtualGrid<P> extends Vue {
         this.containerData = { windowSize, windowScroll, elementWindowOffset, elementSize };
     }
 
-    computeConfigData(containerData: ContainerData, items: Item<P>[]) {
+    computeConfigData(containerData: ContainerData, items: Item<P>[]): ConfigData<P> {
+        if (containerData === null || items === null) {
+            return {
+                windowMargin: 0,
+                gridGap: 0,
+                columnCount: 1,
+                entries: [],
+            };
+        }
+
         const elementWidth = containerData.elementSize ? containerData.elementSize.width : null;
 
         const windowMargin = this.getWindowMargin(containerData.windowSize.height);
@@ -205,7 +201,7 @@ export default class VirtualGrid<P> extends Vue {
             };
         });
 
-        this.configData = {
+        return {
             windowMargin,
             gridGap,
             columnCount,
@@ -213,9 +209,9 @@ export default class VirtualGrid<P> extends Vue {
         };
     }
 
-    computeLayoutData(configData: ConfigData<P>) {
+    computeLayoutData(configData: ConfigData<P>): LayoutData<P> {
         if (configData === null) {
-            return;
+            return { cells: [], totalHeight: 0 };
         }
 
         let currentRowNumber = 1;
@@ -264,12 +260,16 @@ export default class VirtualGrid<P> extends Vue {
 
         const totalHeight = prevRowsTotalHeight + currentRowMaxHeight;
 
-        this.layoutData = { cells, totalHeight };
+        return { cells, totalHeight };
     }
 
-    computeRenderData(configData: ConfigData<P>, containerData: ContainerData, layoutData: LayoutData<P>) {
+    computeRenderData(
+        configData: ConfigData<P>,
+        containerData: ContainerData,
+        layoutData: LayoutData<P>
+    ): RenderData<P> {
         if (layoutData === null || configData === null) {
-            return;
+            return { cellsToRender: [], firstRenderedRowNumber: 0, firstRenderedRowOffset: 0 };
         }
         const cellsToRender: Cell<P>[] = [];
         let firstRenderedRowNumber: null | number = null;
@@ -309,7 +309,7 @@ export default class VirtualGrid<P> extends Vue {
             }
         }
 
-        this.renderData = { cellsToRender, firstRenderedRowNumber, firstRenderedRowOffset };
+        return { cellsToRender, firstRenderedRowNumber, firstRenderedRowOffset };
     }
 
     /** Grid utils */
