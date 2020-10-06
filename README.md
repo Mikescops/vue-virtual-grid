@@ -45,7 +45,7 @@ In your template you can add:
 The `VirtualGrid` takes multiple custom function as properties
 
 -   **updateFunction**:
-    An async function that will populate the grid, constructor is the following `updateFunction(params: { offset: number }, cb: (error: Error, results?: VirtualGrid.Item[]) => void) => void`.
+    An async function that will populate the grid, constructor is the following `updateFunction<P>(params: { offset: number }) => Promise<VirtualGrid.Item<P>[]>`. For synchronous function just return immediately your content with `Promise.resolve([you_content])` for instance.
     The offset will be incremented (+1) each time the function is called.
 -   **getGridGap**:
     A function that will define the gap between elements of the grid, constructor is the following `getGridGap(elementWidth: number, windowHeight: number) => number`.
