@@ -45,7 +45,7 @@ In your template you can add:
 The `VirtualGrid` takes multiple custom function as properties
 
 -   **updateFunction**:
-    A function that will populate the grid, constructor is the following `updateFunction(params: { offset: number }) => VirtualGrid.Item[]`.
+    An async function that will populate the grid, constructor is the following `updateFunction<P>(params: { offset: number }) => Promise<VirtualGrid.Item<P>[]>`. For synchronous function just return immediately your content with `Promise.resolve([you_content])` for instance.
     The offset will be incremented (+1) each time the function is called.
 -   **getGridGap**:
     A function that will define the gap between elements of the grid, constructor is the following `getGridGap(elementWidth: number, windowHeight: number) => number`.
@@ -53,7 +53,7 @@ The `VirtualGrid` takes multiple custom function as properties
     A function that set the width of columns in the grid, constructor is the following `getColumnCount(elementWidth: number) => number;`.
 -   **getWindowMargin**:
     A function that set the margin size used for windowing (virtualization), constructor is the following `getWindowMargin(windowHeight: number) => number;`.
--   **getWindowMargin**:
+-   **getItemRatioHeight**:
     A function that provides a way to compute ratio height/width depending on the display (by default it preserves ratio), constructor is the following `getItemRatioHeight(height: number, width: number, columnWidth: number) => number;`.
 
 Properties are provided with default functions that you can use or get inspired from in `src/utils.ts`.
