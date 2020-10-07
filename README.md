@@ -55,6 +55,8 @@ The `VirtualGrid` takes multiple custom function as properties
     A function that set the margin size used for windowing (virtualization), constructor is the following `getWindowMargin(windowHeight: number) => number;`.
 -   **getItemRatioHeight**:
     A function that provides a way to compute ratio height/width depending on the display (by default it preserves ratio), constructor is the following `getItemRatioHeight(height: number, width: number, columnWidth: number) => number;`.
+-   **updateTriggerMargin**:
+    A number of pixels to the bottom of the page that will trigger the `updateFunction`.
 
 Properties are provided with default functions that you can use or get inspired from in `src/utils.ts`.
 
