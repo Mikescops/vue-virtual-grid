@@ -26,6 +26,6 @@ export default class TitleComponent extends Vue {
     color: #fff;
     background: #666;
 
-    border-radius: 4px;
+    border-radius: 3px;
 }
 </style>

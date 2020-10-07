@@ -26,6 +26,7 @@ export default class ImageComponent extends Vue {
     background: hsl(0, 0%, 98%);
     transition: 100ms ease;
     transition-property: transform box-shadow;
+    border-radius: 3px;
 }
 .image:hover {
     z-index: 1;
