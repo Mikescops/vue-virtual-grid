@@ -57,6 +57,7 @@ export default class VirtualGrid<P> extends Vue {
         width: number,
         columnWidth: number
     ) => number;
+    @Prop({ default: 500 }) updateTriggerMargin: number;
 
     @ProvideReactive() updateLock: boolean = false;
 
@@ -146,7 +147,8 @@ export default class VirtualGrid<P> extends Vue {
 
         if (
             !this.bottomReached &&
-            windowBottom > containerData.elementWindowOffset + containerData.elementSize.height - 500
+            windowBottom >
+                containerData.elementWindowOffset + containerData.elementSize.height - this.updateTriggerMargin
         ) {
             console.log('Loading next batch');
             return this.loadMoreData();
