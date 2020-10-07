@@ -90,16 +90,7 @@ export default class VirtualGrid<P> extends Vue {
     created() {
         window.addEventListener('resize', this.resize);
         window.addEventListener('scroll', this.scroll);
-        this.loadMoreData()
-            .catch((error) => {
-                if (error) {
-                    console.error('Failed to load initial data', error);
-                }
-            })
-            .then(() => {
-                this.ref = this.$refs.virtualGrid as Element;
-                this.computeContainerData();
-            });
+        this.initializeGridData();
     }
 
     beforeDestroy() {
@@ -122,6 +113,19 @@ export default class VirtualGrid<P> extends Vue {
             .then();
     }
 
+    initializeGridData() {
+        this.loadMoreData()
+            .catch((error) => {
+                if (error) {
+                    console.error('Failed to load initial data', error);
+                }
+            })
+            .then(() => {
+                this.ref = this.$refs.virtualGrid as Element;
+                this.computeContainerData();
+            });
+    }
+
     async loadMoreData() {
         if (this.updateLock) {
             return Promise.resolve();
@@ -130,8 +134,9 @@ export default class VirtualGrid<P> extends Vue {
         const newItems = await this.updateFunction({ offset: this.offset });
 
         if (newItems.length === 0) {
-            console.log('Bottom reached');
+            console.debug('Bottom reached');
             this.bottomReached = true;
+            this.updateLock = false;
             return Promise.resolve();
         }
 
@@ -150,7 +155,7 @@ export default class VirtualGrid<P> extends Vue {
             windowBottom >
                 containerData.elementWindowOffset + containerData.elementSize.height - this.updateTriggerMargin
         ) {
-            console.log('Loading next batch');
+            console.debug('Loading next batch');
             return this.loadMoreData();
         }
         return Promise.resolve();
@@ -342,6 +347,13 @@ export default class VirtualGrid<P> extends Vue {
         const gridRowStart = cell.rowNumber - offset;
 
         return `${gridRowStart}`;
+    }
+
+    public resetGrid() {
+        this.offset = 0;
+        this.bottomReached = false;
+        this.items = [];
+        this.initializeGridData();
     }
 
     /** UTILS */

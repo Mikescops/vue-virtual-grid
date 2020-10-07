@@ -1,7 +1,8 @@
 <template>
     <div id="app">
-        <img alt="Vue logo" src="./assets/logo.png" />
-        <VirtualGrid :updateFunction="pullData" />
+        <img alt="Vue logo" src="./assets/logo.png" /> <br />
+        <a class="button" v-on:click="$refs.virtualgrid.resetGrid()">Reset Component</a>
+        <VirtualGrid ref="virtualgrid" :updateFunction="pullData" />
     </div>
 </template>
 
@@ -97,6 +98,15 @@ export default class App extends Vue {
 }
 
 .grid {
-    margin-bottom: 50px;
+    margin: 40px 0;
+}
+
+.button {
+    background: #41b883;
+    color: #fff;
+    padding: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin: 5px;
 }
 </style>
