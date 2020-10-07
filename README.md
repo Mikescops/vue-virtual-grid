@@ -80,6 +80,8 @@ With default `getItemRatioHeight`, in the returned object to your `renderCompone
 
 **Important note:** the component that will render the item should respect the returned height otherwise there will be a difference between computation and rendering (in other words, you will see glitches).
 
+Last but not least, the `resetGrid()` method is exposed to parent in case you want to clear the grid :)
+
 ### Typescript support
 
 If you're using Typescript you can import typing for `Item` and provide custom typing for injected data:
