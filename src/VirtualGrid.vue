@@ -195,6 +195,12 @@ export default class VirtualGrid<P> extends Vue {
                 item.columnSpan = columnCount;
             }
 
+            // if width is not set we leave the height untouched
+            if (!item.width) {
+                return item;
+            }
+
+            // we make sure the width takes the full column space and adjust the height based on ratio
             const imageWidth = columnWidth * item.columnSpan + gridGap * (item.columnSpan - 1);
             return {
                 ...item,
