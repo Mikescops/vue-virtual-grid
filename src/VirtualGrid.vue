@@ -75,15 +75,15 @@ export default class VirtualGrid<P> extends Vue {
         elementSize: { height: 0, width: 0 },
     };
 
-    get configData() {
+    get configData(): ConfigData<P> {
         return this.computeConfigData(this.containerData, this.items);
     }
 
-    get layoutData() {
+    get layoutData(): LayoutData<P> {
         return this.computeLayoutData(this.configData);
     }
 
-    get renderData() {
+    get renderData(): RenderData<P> {
         return this.computeRenderData(this.configData, this.containerData, this.layoutData);
     }
 
@@ -98,11 +98,11 @@ export default class VirtualGrid<P> extends Vue {
         window.removeEventListener('scroll', this.scroll);
     }
 
-    resize() {
+    resize(): void {
         this.computeContainerData();
     }
 
-    scroll() {
+    scroll(): void {
         this.computeContainerData();
         this.computeInfiniteScroll(this.containerData)
             .catch((error) => {
@@ -113,7 +113,7 @@ export default class VirtualGrid<P> extends Vue {
             .then();
     }
 
-    initializeGridData() {
+    initializeGridData(): void {
         this.loadMoreData()
             .catch((error) => {
                 if (error) {
@@ -126,9 +126,9 @@ export default class VirtualGrid<P> extends Vue {
             });
     }
 
-    async loadMoreData() {
-        if (this.updateLock) {
-            return Promise.resolve();
+    async loadMoreData(): Promise<Item<P>[]> {
+        if (this.updateLock || this.bottomReached) {
+            return Promise.resolve([]);
         }
         this.updateLock = true;
         const newItems = await this.updateFunction({ offset: this.offset });
@@ -137,16 +137,16 @@ export default class VirtualGrid<P> extends Vue {
             console.debug('Bottom reached');
             this.bottomReached = true;
             this.updateLock = false;
-            return Promise.resolve();
+            return Promise.resolve([]);
         }
 
         this.items = [...this.items, ...newItems];
         this.offset += 1;
         this.updateLock = false;
-        return Promise.resolve();
+        return Promise.resolve(newItems);
     }
 
-    computeInfiniteScroll(containerData: ContainerData) {
+    computeInfiniteScroll(containerData: ContainerData): Promise<Item<P>[]> {
         const windowTop = containerData.windowScroll.y;
         const windowBottom = windowTop + containerData.windowSize.height;
 
@@ -158,10 +158,10 @@ export default class VirtualGrid<P> extends Vue {
             console.debug('Loading next batch');
             return this.loadMoreData();
         }
-        return Promise.resolve();
+        return Promise.resolve([]);
     }
 
-    computeContainerData() {
+    computeContainerData(): void {
         if (this.ref === null) {
             return;
         }
@@ -354,14 +354,20 @@ export default class VirtualGrid<P> extends Vue {
         return `${gridRowStart}`;
     }
 
-    public resetGrid() {
+    /** For Parent methods */
+
+    resetGrid(): void {
         this.offset = 0;
         this.bottomReached = false;
         this.items = [];
         this.initializeGridData();
     }
 
-    /** UTILS */
+    getCurrentItems(): Item<P>[] {
+        return this.items;
+    }
+
+    /** Utils */
 
     isSameElementSize(a: ElementSize, b: ElementSize) {
         return a.width === b.width && a.height === b.height;
