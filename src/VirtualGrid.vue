@@ -195,11 +195,6 @@ export default class VirtualGrid<P> extends Vue {
         const columnWidth = this.getColumnWidth(columnCount, gridGap, elementWidth);
 
         const entries = items.map((item) => {
-            // if the column span is 0 or negative we assume it is full width
-            if (item.columnSpan < 1) {
-                item.columnSpan = columnCount;
-            }
-
             // if width is not set we leave the height untouched
             if (!item.width) {
                 return item;
@@ -234,41 +229,51 @@ export default class VirtualGrid<P> extends Vue {
         let columnShift = 0;
 
         const cells: Cell<P>[] = configData.entries.map((entry, index) => {
-            const distanceToRowStart = (index + columnShift) % configData.columnCount;
+            const { columnCount, gridGap } = configData;
+
+            let columnSpanRecompute = entry.columnSpan;
+            let heightRecompute = entry.height;
+
+            // if the column span is 0 or negative we assume it is full width
+            if (columnSpanRecompute < 1) {
+                columnSpanRecompute = columnCount;
+            }
+
+            const distanceToRowStart = (index + columnShift) % columnCount;
             if (entry.newRow && distanceToRowStart !== 0) {
-                columnShift += configData.columnCount - distanceToRowStart;
+                columnShift += columnCount - distanceToRowStart;
             }
 
             const shiftedIndex = index + columnShift;
-            const columnNumber = (shiftedIndex % configData.columnCount) + 1;
-            const rowNumber = Math.floor(shiftedIndex / configData.columnCount) + 1;
+            const columnNumber = (shiftedIndex % columnCount) + 1;
+            const rowNumber = Math.floor(shiftedIndex / columnCount) + 1;
 
             // here we check that an image is not going out of the grid, if yes we resize it
-            if (columnNumber + entry.columnSpan > configData.columnCount + 1) {
-                const overlapNumber = columnNumber + entry.columnSpan - configData.columnCount - 1;
-                const overlapRatio = overlapNumber / entry.columnSpan;
-                entry.height = entry.height * (1 - overlapRatio);
+            if (columnNumber + columnSpanRecompute > columnCount + 1) {
+                const overlapNumber = columnNumber + columnSpanRecompute - columnCount - 1;
+                const overlapRatio = overlapNumber / columnSpanRecompute;
+                heightRecompute = heightRecompute * (1 - overlapRatio);
 
-                entry.columnSpan -= overlapNumber;
+                columnSpanRecompute -= overlapNumber;
             }
 
             // we need to count the shift created by multiple column objects
-            if (entry.columnSpan > 1) {
-                columnShift += entry.columnSpan - 1;
+            if (columnSpanRecompute > 1) {
+                columnShift += columnSpanRecompute - 1;
             }
 
             if (rowNumber !== currentRowNumber) {
                 currentRowNumber = rowNumber;
-                prevRowsTotalHeight += currentRowMaxHeight + configData.gridGap;
+                prevRowsTotalHeight += currentRowMaxHeight + gridGap;
                 currentRowMaxHeight = 0;
             }
 
             const offset = prevRowsTotalHeight;
-            const height = Math.round(entry.height);
+            const height = Math.round(heightRecompute);
 
             currentRowMaxHeight = Math.max(currentRowMaxHeight, height);
 
-            return { ...entry, columnNumber, rowNumber, offset, height };
+            return { ...entry, columnNumber, rowNumber, offset, height, columnSpan: columnSpanRecompute };
         });
 
         const totalHeight = prevRowsTotalHeight + currentRowMaxHeight;
