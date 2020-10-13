@@ -1,6 +1,12 @@
 <script lang="ts">
 import { Prop, Component, Vue, ProvideReactive } from 'vue-property-decorator';
-import { getGridGapDefault, getColumnCountDefault, getWindowMarginDefault, getItemRatioHeightDefault } from './utils';
+import {
+    getGridGapDefault,
+    getColumnCountDefault,
+    getWindowMarginDefault,
+    getItemRatioHeightDefault,
+    debugLog,
+} from './utils';
 import { Item } from './types';
 
 interface ContainerData {
@@ -57,6 +63,8 @@ export default class VirtualGrid<P> extends Vue {
         columnWidth: number
     ) => number;
     @Prop({ default: 500 }) updateTriggerMargin: number;
+    @Prop({ default: null }) loader: Vue.Component;
+    @Prop({ default: false }) debug: boolean;
 
     @ProvideReactive() updateLock: boolean = false;
 
@@ -70,6 +78,10 @@ export default class VirtualGrid<P> extends Vue {
         elementWindowOffset: 0,
         elementSize: { height: 0, width: 0 },
     };
+
+    get loadingBatch(): boolean {
+        return this.loader && this.updateLock;
+    }
 
     get configData(): ConfigData<P> {
         return this.computeConfigData(this.containerData, this.items);
@@ -123,11 +135,11 @@ export default class VirtualGrid<P> extends Vue {
         if (!this.bottomReached && windowBottom > bottomTrigger && !this.updateLock) {
             this.updateLock = true;
 
-            console.debug('Loading next batch');
+            debugLog(this.debug, 'Loading next batch');
             const isLastBatch = await this.updateFunction();
 
             if (isLastBatch) {
-                console.debug('Bottom reached');
+                debugLog(this.debug, 'Bottom reached');
                 this.bottomReached = true;
             }
 
@@ -381,10 +393,11 @@ export default class VirtualGrid<P> extends Vue {
         :style="{
             boxSizing: 'border-box',
             height: `${layoutData.totalHeight}px`,
-            paddingTop:
+            paddingTop: `${
                 renderData !== null && renderData.firstRenderedRowOffset !== null
-                    ? `${renderData.firstRenderedRowOffset}px`
-                    : '0px',
+                    ? renderData.firstRenderedRowOffset + 'px'
+                    : '0px'
+            }`,
         }"
     >
         <div
@@ -404,9 +417,10 @@ export default class VirtualGrid<P> extends Vue {
                     'grid-row-start': getGridRowStart(item, renderData),
                 }"
             >
-                <component :is="item.renderComponent" :item="item"></component>
+                <component :is="item.renderComponent" :item="item" />
             </div>
         </div>
+        <component :is="loadingBatch && loader" />
     </div>
 </template>
 

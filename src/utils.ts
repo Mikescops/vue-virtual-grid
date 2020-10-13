@@ -19,3 +19,11 @@ export const getItemRatioHeightDefault = (height: number, width: number, columnW
     const imageRatio = height / width;
     return Math.round(columnWidth * imageRatio);
 };
+
+/** Other utils */
+
+export const debugLog = (condition: boolean, ...args: any[]) => {
+    if (condition) {
+        console.debug(...args);
+    }
+};
