@@ -46,9 +46,8 @@ interface RenderData<P> {
 
 @Component
 export default class VirtualGrid<P> extends Vue {
-    @Prop({ default: () => (): Item<unknown>[] => [] }) updateFunction: (params: {
-        offset: number;
-    }) => Promise<Item<P>[]>;
+    @Prop({ required: true }) items: Item<P>[];
+    @Prop({ default: () => () => true }) updateFunction: () => Promise<boolean>;
     @Prop({ default: () => getGridGapDefault }) getGridGap: (elementWidth: number, windowHeight: number) => number;
     @Prop({ default: () => getColumnCountDefault }) getColumnCount: (elementWidth: number) => number;
     @Prop({ default: () => getWindowMarginDefault }) getWindowMargin: (windowHeight: number) => number;
@@ -61,9 +60,6 @@ export default class VirtualGrid<P> extends Vue {
 
     @ProvideReactive() updateLock: boolean = false;
 
-    @ProvideReactive() items: Item<P>[] = [];
-
-    @ProvideReactive() offset: number = 0;
     @ProvideReactive() bottomReached: boolean = false;
 
     @ProvideReactive() ref: Element = null;
@@ -87,7 +83,7 @@ export default class VirtualGrid<P> extends Vue {
         return this.computeRenderData(this.configData, this.containerData, this.layoutData);
     }
 
-    created() {
+    mounted() {
         window.addEventListener('resize', this.resize);
         window.addEventListener('scroll', this.scroll);
         this.initializeGridData();
@@ -104,7 +100,7 @@ export default class VirtualGrid<P> extends Vue {
 
     scroll(): void {
         this.computeContainerData();
-        this.computeInfiniteScroll(this.containerData)
+        this.loadMoreData(this.containerData)
             .catch((error) => {
                 if (error) {
                     console.error('Fail to load next data batch', error);
@@ -114,51 +110,30 @@ export default class VirtualGrid<P> extends Vue {
     }
 
     initializeGridData(): void {
-        this.loadMoreData()
-            .catch((error) => {
-                if (error) {
-                    console.error('Failed to load initial data', error);
-                }
-            })
-            .then(() => {
-                this.ref = this.$refs.virtualGrid as Element;
-                this.computeContainerData();
-            });
+        this.ref = this.$refs.virtualGrid as Element;
+        this.computeContainerData();
     }
 
-    async loadMoreData(): Promise<Item<P>[]> {
-        if (this.updateLock || this.bottomReached) {
-            return Promise.resolve([]);
-        }
-        this.updateLock = true;
-        const newItems = await this.updateFunction({ offset: this.offset });
-
-        if (newItems.length === 0) {
-            console.debug('Bottom reached');
-            this.bottomReached = true;
-            this.updateLock = false;
-            return Promise.resolve([]);
-        }
-
-        this.items = [...this.items, ...newItems];
-        this.offset += 1;
-        this.updateLock = false;
-        return Promise.resolve(newItems);
-    }
-
-    computeInfiniteScroll(containerData: ContainerData): Promise<Item<P>[]> {
+    async loadMoreData(containerData: ContainerData): Promise<void> {
         const windowTop = containerData.windowScroll.y;
         const windowBottom = windowTop + containerData.windowSize.height;
+        const bottomTrigger =
+            containerData.elementWindowOffset + containerData.elementSize.height - this.updateTriggerMargin;
 
-        if (
-            !this.bottomReached &&
-            windowBottom >
-                containerData.elementWindowOffset + containerData.elementSize.height - this.updateTriggerMargin
-        ) {
+        if (!this.bottomReached && windowBottom > bottomTrigger && !this.updateLock) {
+            this.updateLock = true;
+
             console.debug('Loading next batch');
-            return this.loadMoreData();
+            const isLastBatch = await this.updateFunction();
+
+            if (isLastBatch) {
+                console.debug('Bottom reached');
+                this.bottomReached = true;
+            }
+
+            this.updateLock = false;
         }
-        return Promise.resolve([]);
+        return Promise.resolve();
     }
 
     computeContainerData(): void {
@@ -354,17 +329,11 @@ export default class VirtualGrid<P> extends Vue {
         return `${gridRowStart}`;
     }
 
-    /** For Parent methods */
+    /** For Parent Component */
 
     resetGrid(): void {
-        this.offset = 0;
         this.bottomReached = false;
-        this.items = [];
         this.initializeGridData();
-    }
-
-    getCurrentItems(): Item<P>[] {
-        return this.items;
     }
 
     /** Utils */

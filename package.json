@@ -1,6 +1,6 @@
 {
   "name": "vue-virtual-grid",
-  "version": "1.2.3",
+  "version": "2.0.0",
   "author": "Corentin Mors <corentin@pixelswap.fr>",
   "license": "MIT",
   "repository": "github:mikescops/vue-virtual-grid",

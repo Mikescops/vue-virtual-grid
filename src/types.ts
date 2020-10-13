@@ -1,4 +1,8 @@
-import { Component } from 'vue';
+import Vue, { Component } from 'vue';
+
+export interface VirtualGridInterface extends Vue {
+    resetGrid: () => void;
+}
 
 export interface Item<P> {
     id: string;
