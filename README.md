@@ -7,8 +7,8 @@ _Virtual Scrolling Grid made for VueJS based on CSS grids._
 ---
 
 -   Render any Vue Component (images, iframes, content) of a known width/height inside.
--   Variable height items in the same row.
--   Variable width items (based on columns).
+-   Variable height items in the same row and variable width items (based on columns).
+-   Highly customizable (custom loader, rendering, debug...).
 -   Rendering is done with virtual scrolling (aka windowing).
 -   Supports infinite scroll!
 
@@ -58,7 +58,7 @@ The `items` property is requeried and should be an array of the following object
 
 You can update the `items` property at any time (and thus decide what can of storage you want to use) and the grid layout will be recomputed.
 
-The `VirtualGrid` also takes multiple custom optional functions/variables as properties
+The `VirtualGrid` also takes multiple custom **optional** functions/variables as properties
 
 -   **updateFunction**:
     An async function that will populate the grid, constructor is the following `updateFunction() => Promise<boolean>`. For synchronous function just return immediately with `Promise.resolve(boolean)` for instance.
@@ -72,6 +72,10 @@ The `VirtualGrid` also takes multiple custom optional functions/variables as pro
     A function that provides a way to adjust the item height by computing the initial height/width ratio and the column width (by default it preserves ratio), constructor is the following `getItemRatioHeight(height: number, width: number, columnWidth: number) => number;`.
 -   **updateTriggerMargin**:
     A number of pixels to the bottom of the page that will trigger the `updateFunction`.
+-   **loader**:
+    A VueJS Component to display a loader when waiting for the next batch of data.
+-   **debug**:
+    A boolean to activate debug log and monitor when batches are trigger and bottom reached for instance.
 
 Properties are provided with default functions that you can use or get inspired from in `src/utils.ts`.
 

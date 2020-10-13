@@ -2,7 +2,14 @@
     <div id="app">
         <img alt="Vue logo" src="./assets/logo.png" /> <br />
         <a class="button" v-on:click="resetList()">Reset Component</a>
-        <VirtualGrid :v-if="loaded" ref="virtualgrid" :items="list" :updateFunction="pullData" />
+        <VirtualGrid
+            :v-if="loaded"
+            ref="virtualgrid"
+            :items="list"
+            :updateFunction="pullData"
+            :debug="true"
+            :loader="loaderComponent"
+        />
     </div>
 </template>
 
@@ -10,6 +17,7 @@
 import { Component, Provide, ProvideReactive, Vue } from 'vue-property-decorator';
 import VirtualGrid from '../src/VirtualGrid.vue';
 import { Item, VirtualGridInterface } from '../src/types';
+import Loader from './components/Loader.vue';
 
 // Custom components to render
 import * as ImageComponent from './components/Image.vue';
@@ -20,12 +28,13 @@ type CustomDataTypes = ImageComponent.Image | TitleComponent.Title | MapComponen
 
 @Component({
     components: {
-        VirtualGrid: VirtualGrid,
+        VirtualGrid,
     },
 })
 export default class App extends Vue {
-    @Provide() loaded: boolean = false;
+    @ProvideReactive() loaded: boolean = false;
     @Provide() batchSize: number = 50;
+    @Provide() loaderComponent: Vue.Component = Loader;
 
     @ProvideReactive() list: Item<CustomDataTypes>[] = [];
     @ProvideReactive() offset: number = 0;
@@ -106,7 +115,8 @@ export default class App extends Vue {
 
         this.offset += 1;
 
-        return Promise.resolve(false);
+        // Wait between each response just to see the loader
+        return new Promise((resolve) => setTimeout(() => resolve(false), 2000));
     }
 
     resetList() {
