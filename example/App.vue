@@ -1,15 +1,15 @@
 <template>
     <div id="app">
         <img alt="Vue logo" src="./assets/logo.png" /> <br />
-        <a class="button" v-on:click="$refs.virtualgrid.resetGrid()">Reset Component</a>
-        <VirtualGrid ref="virtualgrid" :updateFunction="pullData" />
+        <a class="button" v-on:click="resetList()">Reset Component</a>
+        <VirtualGrid :v-if="loaded" ref="virtualgrid" :items="list" :updateFunction="pullData" />
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Provide, Vue } from 'vue-property-decorator';
+import { Component, Provide, ProvideReactive, Vue } from 'vue-property-decorator';
 import VirtualGrid from '../src/VirtualGrid.vue';
-import { Item } from '../src/types';
+import { Item, VirtualGridInterface } from '../src/types';
 
 // Custom components to render
 import * as ImageComponent from './components/Image.vue';
@@ -24,23 +24,43 @@ type CustomDataTypes = ImageComponent.Image | TitleComponent.Title | MapComponen
     },
 })
 export default class App extends Vue {
+    @Provide() loaded: boolean = false;
     @Provide() batchSize: number = 50;
+
+    @ProvideReactive() list: Item<CustomDataTypes>[] = [];
+    @ProvideReactive() offset: number = 0;
+
+    mounted() {
+        this.initializeList();
+    }
+
+    initializeList() {
+        this.pullData()
+            .catch((error) => {
+                if (error) {
+                    console.error('Failed to load initial data', error);
+                }
+            })
+            .then(() => {
+                this.loaded = true;
+            });
+    }
 
     random(low: number, high: number) {
         return Math.floor(Math.random() * high) + low;
     }
 
-    pullData(params: { offset: number }): Promise<Item<CustomDataTypes>[]> {
+    pullData(): Promise<boolean> {
         // This is to try when we reach end of infinite scroll (only 5 loads)
-        if (params.offset > 5) {
-            return Promise.resolve([]);
+        if (this.offset > 5) {
+            return Promise.resolve(true);
         }
 
         // Add a title at each section
         const sectionTitle = {
-            id: `title-${params.offset}`,
+            id: `title-${this.offset}`,
             injected: {
-                title: `Welcome to section ${params.offset}`,
+                title: `Welcome to section ${this.offset}`,
             },
             width: 500,
             height: 250,
@@ -51,7 +71,7 @@ export default class App extends Vue {
 
         // Add a map sometimes (to test iframes)
         const map = {
-            id: `map-${params.offset}`,
+            id: `map-${this.offset}`,
             injected: {
                 coordinates: '-11.18408203125%2C39.2832938689385%2C17.819824218750004%2C52.77618568896171',
             },
@@ -60,7 +80,7 @@ export default class App extends Vue {
             newRow: true,
             renderComponent: MapComponent.default,
         };
-        const sectionMap = params.offset === 0 ? [map] : [];
+        const sectionMap = this.offset === 0 ? [map] : [];
 
         // Populate random images (for the demo)
         const randomImages = Array.from({ length: this.batchSize }, (_, index) => {
@@ -68,7 +88,7 @@ export default class App extends Vue {
 
             const width = 250 * randSize;
             const height = 250; // this can work with random height also
-            const id = index + params.offset * this.batchSize;
+            const id = index + this.offset * this.batchSize;
             return {
                 id: `img-${id}`,
                 injected: {
@@ -82,7 +102,20 @@ export default class App extends Vue {
             };
         });
 
-        return Promise.resolve([sectionTitle, ...randomImages, ...sectionMap]);
+        this.list = [...this.list, ...[sectionTitle, ...randomImages, ...sectionMap]];
+
+        this.offset += 1;
+
+        return Promise.resolve(false);
+    }
+
+    resetList() {
+        this.loaded = false;
+        this.list = [];
+        this.offset = 0;
+        const grid = this.$refs.virtualgrid as VirtualGridInterface;
+        grid.resetGrid();
+        this.initializeList();
     }
 }
 </script>

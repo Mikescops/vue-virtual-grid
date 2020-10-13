@@ -39,14 +39,29 @@ components: {
 In your template you can add:
 
 ```html
-<VirtualGrid :updateFunction="yourGetDataFunction" />
+<VirtualGrid :items="yourDataSet" :updateFunction="yourGetDataFunction" />
 ```
 
-The `VirtualGrid` takes multiple custom function as properties
+The `items` property is requeried and should be an array of the following object:
+
+```js
+{
+    id: string, // binding id (must be unique)
+    injected?: string, // custom param, pass an object with what you want inside (optional)
+    height: number, // original height of the item
+    width?: number, // original width of the item (optional: if not set, height will not be adjusted by getItemRatioHeight)
+    columnSpan: number, // how many columns will use your item (put 0 if you want the full width)
+    newRow?: boolean, // if the item should appear on the next row (optional)
+    renderComponent: Component // A VueJS component (custom template of your choice) to render the item (passed as prop `item`)
+}
+```
+
+You can update the `items` property at any time (and thus decide what can of storage you want to use) and the grid layout will be recomputed.
+
+The `VirtualGrid` also takes multiple custom optional functions/variables as properties
 
 -   **updateFunction**:
-    An async function that will populate the grid, constructor is the following `updateFunction<P>(params: { offset: number }) => Promise<VirtualGrid.Item<P>[]>`. For synchronous function just return immediately your content with `Promise.resolve([you_content])` for instance.
-    The offset will be incremented (+1) each time the function is called.
+    An async function that will populate the grid, constructor is the following `updateFunction() => Promise<boolean>`. For synchronous function just return immediately with `Promise.resolve(boolean)` for instance.
 -   **getGridGap**:
     A function that will define the gap between elements of the grid, constructor is the following `getGridGap(elementWidth: number, windowHeight: number) => number`.
 -   **getColumnCount**:
@@ -60,19 +75,7 @@ The `VirtualGrid` takes multiple custom function as properties
 
 Properties are provided with default functions that you can use or get inspired from in `src/utils.ts`.
 
-The function `updateFunction` should return a list of items that will be rendered, each item should look like this object:
-
-```js
-{
-    id: string, // binding id (must be unique)
-    injected?: string, // custom param, pass an object with what you want inside (optional)
-    height: number, // original height of the item
-    width?: number, // original width of the item (optional: if not set, height will not be adjusted by getItemRatioHeight)
-    columnSpan: number, // how many columns will use your item (put 0 if you want the full width)
-    newRow?: boolean, // if the item should appear on the next row (optional)
-    renderComponent: Component // A VueJS component (custom template of your choice) to render the item (passed as prop `item`)
-}
-```
+The function `updateFunction` should update the list of items that will be rendered (each item should look like the `Item` object presented before) and return (with a Promise) a boolean that signify that the last batch was loaded (bottom reached) or not.
 
 The property `injected` does not impact the computation, it is here to pass custom data to the final component.
 
@@ -96,6 +99,8 @@ interface Image {
 
 const item: Item<Image>;
 ```
+
+You can also import the typing for utils methods with `VirtualGridInterface`.
 
 ### Live example
 
