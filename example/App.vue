@@ -9,6 +9,7 @@
             :updateFunction="pullData"
             :debug="true"
             :loader="loaderComponent"
+            @event-test="alertTest"
         />
     </div>
 </template>
@@ -126,6 +127,10 @@ export default class App extends Vue {
         const grid = this.$refs.virtualgrid as VirtualGridInterface;
         grid.resetGrid();
         this.initializeList();
+    }
+
+    alertTest() {
+        alert('This is an event passed with listeners');
     }
 }
 </script>

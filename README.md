@@ -58,6 +58,8 @@ The `items` property is requeried and should be an array of the following object
 
 You can update the `items` property at any time (and thus decide what can of storage you want to use) and the grid layout will be recomputed.
 
+### Customizing the Grid
+
 The `VirtualGrid` also takes multiple custom **optional** functions/variables as properties
 
 -   **updateFunction**:
@@ -88,6 +90,22 @@ With default `getItemRatioHeight`, in the returned object to your `renderCompone
 **Important note:** the component that will render the item should respect the returned height otherwise there will be a difference between computation and rendering (in other words, you will see glitches).
 
 Last but not least, the `resetGrid()` method is exposed to parent in case you want to clear the grid :)
+
+### Passing events to the grid
+
+The grid will pass any events attached to it to its children.
+
+```html
+<VirtualGrid @custom-event="someMethod" />
+```
+
+That way, in your children Component, you can emit to this event and use the parent method.
+
+```js
+this.$emit('custom-event', someArguments);
+```
+
+On the demo you can try this by clicking on a section title, it will display an alert box from the parent component.
 
 ### Typescript support
 
