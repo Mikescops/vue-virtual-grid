@@ -1,6 +1,6 @@
 <template>
     <div class="title" :style="{ height: `${item.height}px` }">
-        <h2>{{ item.injected.title }}</h2>
+        <h2 @click="$emit('event-test')">{{ item.injected.title }}</h2>
     </div>
 </template>
 
