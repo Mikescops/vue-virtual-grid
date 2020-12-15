@@ -3,10 +3,10 @@
         <img alt="Vue logo" src="./assets/logo.png" /> <br />
         <a class="button" v-on:click="resetList()">Reset Component</a>
         <VirtualGrid
-            :v-if="loaded"
+            v-if="loaded"
             ref="virtualgrid"
             :items="list"
-            :updateFunction="pullData"
+            :updateFunction="pullDataWithDelay"
             :debug="true"
             :loader="loaderComponent"
             @event-test="alertTest"
@@ -117,7 +117,11 @@ export default class App extends Vue {
         this.offset += 1;
 
         // Wait between each response just to see the loader
-        return new Promise((resolve) => setTimeout(() => resolve(false), 2000));
+        return Promise.resolve(false);
+    }
+
+    pullDataWithDelay(): Promise<boolean> {
+        return new Promise((resolve) => setTimeout(() => resolve(this.pullData()), 2000));
     }
 
     resetList() {

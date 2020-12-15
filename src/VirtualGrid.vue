@@ -96,9 +96,10 @@ export default class VirtualGrid<P> extends Vue {
     }
 
     mounted() {
+        this.ref = this.$refs.virtualGrid as Element;
+        this.initiliazeGrid();
         window.addEventListener('resize', this.resize);
         window.addEventListener('scroll', this.scroll);
-        this.initializeGridData();
     }
 
     beforeDestroy() {
@@ -107,12 +108,22 @@ export default class VirtualGrid<P> extends Vue {
     }
 
     resize(): void {
-        this.computeContainerData();
+        this.loadMoreData();
     }
 
     scroll(): void {
+        this.loadMoreData();
+    }
+
+    initiliazeGrid(): void {
         this.computeContainerData();
-        this.loadMoreData(this.containerData)
+        this.$nextTick(async () => {
+            this.loadMoreData();
+        });
+    }
+
+    loadMoreData(): void {
+        this.loadMoreDataAsync()
             .catch((error) => {
                 if (error) {
                     console.error('Fail to load next data batch', error);
@@ -121,18 +132,17 @@ export default class VirtualGrid<P> extends Vue {
             .then();
     }
 
-    initializeGridData(): void {
-        this.ref = this.$refs.virtualGrid as Element;
+    async loadMoreDataAsync(): Promise<void> {
         this.computeContainerData();
-    }
 
-    async loadMoreData(containerData: ContainerData): Promise<void> {
-        const windowTop = containerData.windowScroll.y;
-        const windowBottom = windowTop + containerData.windowSize.height;
-        const bottomTrigger =
-            containerData.elementWindowOffset + containerData.elementSize.height - this.updateTriggerMargin;
+        const windowTop = this.containerData.windowScroll.y;
+        const windowBottom = windowTop + this.containerData.windowSize.height;
+        const bottomTrigger = Math.max(
+            0,
+            this.containerData.elementWindowOffset + this.containerData.elementSize.height - this.updateTriggerMargin
+        );
 
-        if (!this.bottomReached && windowBottom > bottomTrigger && !this.updateLock) {
+        if (!this.bottomReached && windowBottom >= bottomTrigger && !this.updateLock) {
             this.updateLock = true;
 
             debugLog(this.debug, 'Loading next batch');
@@ -144,8 +154,9 @@ export default class VirtualGrid<P> extends Vue {
             }
 
             this.updateLock = false;
+            await this.loadMoreDataAsync();
         }
-        return Promise.resolve();
+        return;
     }
 
     computeContainerData(): void {
@@ -345,7 +356,7 @@ export default class VirtualGrid<P> extends Vue {
 
     resetGrid(): void {
         this.bottomReached = false;
-        this.initializeGridData();
+        this.loadMoreData();
     }
 
     /** Utils */
