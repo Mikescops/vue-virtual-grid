@@ -7,12 +7,7 @@
             scrolling="no"
             marginheight="0"
             marginwidth="0"
-            :src="
-                'https://www.openstreetmap.org/export/embed.html?bbox=' +
-                item.injected.coordinates +
-                '&amp;layer=mapnik'
-            "
-            style="border: 1px solid black"
+            :src="`https://www.openstreetmap.org/export/embed.html?bbox=${item.injected.coordinates}&amp;layer=mapnik`"
         ></iframe>
     </div>
 </template>
