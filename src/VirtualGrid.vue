@@ -422,7 +422,7 @@ export default class VirtualGrid<P> extends Vue {
                 v-for="item in renderData.cellsToRender"
                 :key="item.id"
                 :style="{
-                    'height': item.height + 'px',
+                    'height': `${item.height}px`,
                     'grid-column-start': item.columnNumber,
                     'grid-column-end': item.columnNumber + item.columnSpan,
                     'grid-row-start': getGridRowStart(item, renderData),
