@@ -412,6 +412,7 @@ export default class VirtualGrid<P> extends Vue {
         }"
     >
         <div
+            class="grid"
             :style="{
                 'display': '-ms-grid',
                 'display': 'grid',
