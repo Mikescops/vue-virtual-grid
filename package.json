@@ -4,7 +4,7 @@
   "author": "Corentin Mors <corentin@pixelswap.fr>",
   "license": "MIT",
   "repository": "github:mikescops/vue-virtual-grid",
-  "private": false,
+  "private": true,
   "source": "src/main.ts",
   "module": "./dist/vue-virtual-grid.es.js",
   "main": "./dist/vue-virtual-grid.umd.js",
