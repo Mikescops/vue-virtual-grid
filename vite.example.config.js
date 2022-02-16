@@ -7,5 +7,13 @@ export default defineConfig({
     build: {
         outDir: '../demo',
         target: 'es2020'
-    }
+    },
+    rollupOptions: {
+        external: ['vue'],
+        output: {
+            globals: {
+                vue: 'Vue',
+            },
+        },
+    },
 });
