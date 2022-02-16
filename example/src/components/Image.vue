@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import { Item } from '../../src/types';
+import { Item } from '../../../src/types';
 
 export interface Image {
     alt: string;

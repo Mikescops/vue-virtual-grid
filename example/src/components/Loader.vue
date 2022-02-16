@@ -1,6 +1,6 @@
 <template>
     <div class="loader">
-        <img src="../assets/loader.svg" />
+        <img src="../../assets/loader.svg" />
         <p>We limit the loading speed for demo purpose only.</p>
     </div>
 </template>

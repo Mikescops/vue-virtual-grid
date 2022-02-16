@@ -1,48 +1,44 @@
 {
   "name": "vue-virtual-grid",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "author": "Corentin Mors <corentin@pixelswap.fr>",
   "license": "MIT",
   "repository": "github:mikescops/vue-virtual-grid",
-  "private": true,
+  "private": false,
   "source": "src/main.ts",
-  "main": "./dist/virtual-grid.common.js",
-  "unpkg": "./dist/virtual-grid.umd.js",
+  "module": "./dist/vue-virtual-grid.es.js",
+  "main": "./dist/vue-virtual-grid.umd.js",
+  "types": "./dist/types/main.d.ts",
   "scripts": {
-    "build": "vue-cli-service build --target lib --name virtual-grid src/main.ts",
-    "lint": "vue-cli-service lint",
-    "serve:example": "vue-cli-service serve example/main.ts",
-    "build:example": "vue-cli-service build example/main.ts --dest demo"
+    "build": "vite build && vue-tsc --emitDeclarationOnly && mv dist/src dist/types && rm -rf dist/example",
+    "lint": "eslint --ext .js,.ts,.vue src/",
+    "serve:example": "vite preview --config vite.example.config.js",
+    "build:example": "vite build --config vite.example.config.js"
   },
   "peerDependencies": {
     "vue": "^2.6.12"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.19.0",
-    "@typescript-eslint/parser": "^4.19.0",
-    "@vue/cli-plugin-eslint": "~4.5.12",
-    "@vue/cli-plugin-typescript": "~4.5.12",
-    "@vue/cli-service": "~4.5.12",
-    "@vue/compiler-sfc": "^3.0.7",
-    "@vue/eslint-config-prettier": "^6.0.0",
-    "@vue/eslint-config-typescript": "^7.0.0",
-    "eslint": "^7.22.0",
-    "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-vue": "^7.8.0",
-    "prettier": "^2.2.1",
-    "typescript": "^4.2.3",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "@vitejs/plugin-vue": "^1.6.1",
+    "@vue/compiler-sfc": "^3.2.31",
+    "@vue/eslint-config-prettier": "^7.0.0",
+    "@vue/eslint-config-typescript": "^10.0.0",
+    "eslint": "^8.9.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-vue": "^8.4.1",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.5",
+    "vite": "^2.8.3",
+    "vite-plugin-vue2": "^1.9.3",
     "vue": "^2.6.12",
     "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^9.1.2",
-    "vue-template-compiler": "^2.6.12"
+    "vue-tsc": "^0.31.4"
   },
   "files": [
-    "dist/*",
-    "src/*",
-    "types/*",
-    "*.json",
-    "*.js",
-    "*.ts"
+    "dist"
   ],
   "keywords": [
     "vue",

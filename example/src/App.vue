@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <img alt="Vue logo" src="./assets/logo.png" /> <br />
+        <img alt="Vue logo" src="../assets/logo.png" /> <br />
         <a class="button" v-on:click="resetList()">Reset Component</a>
         <VirtualGrid
             v-if="loaded"
@@ -16,8 +16,8 @@
 
 <script lang="ts">
 import { Component, Provide, ProvideReactive, Vue } from 'vue-property-decorator';
-import VirtualGrid from '../src/VirtualGrid.vue';
-import { Item, VirtualGridInterface } from '../src/types';
+import VirtualGrid from '../../src/VirtualGrid.vue';
+import { Item, VirtualGridInterface } from '../../src/types';
 import Loader from './components/Loader.vue';
 
 // Custom components to render

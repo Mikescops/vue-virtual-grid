@@ -3,7 +3,7 @@ module.exports = {
     env: {
         browser: true,
         commonjs: true,
-        node: true,
+        es2021: true,
         es6: true
     },
     parser: 'vue-eslint-parser',
