@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
+        "outDir": "dist",
         "target": "ES2020",
-        "isolatedModules": false,
+        "isolatedModules": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "declaration": true,
@@ -10,7 +11,7 @@
         "importHelpers": true,
         "noImplicitReturns": true,
         "removeComments": true,
-        "module": "ES2015",
+        "module": "ES2020",
         "moduleResolution": "node",
         "noLib": false,
         "noUnusedParameters": true,
@@ -21,7 +22,7 @@
         "forceConsistentCasingInFileNames": true,
         "allowJs": true,
         "baseUrl": ".",
-        "types": ["webpack-env"],
+        "types": [],
         "paths": {
             "@/*": ["src/*", "types/*"]
         },

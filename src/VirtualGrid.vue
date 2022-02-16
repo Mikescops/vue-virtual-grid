@@ -46,8 +46,8 @@ interface LayoutData<P> {
 
 interface RenderData<P> {
     cellsToRender: Cell<P>[];
-    firstRenderedRowNumber: number;
-    firstRenderedRowOffset: number;
+    firstRenderedRowNumber: number | null;
+    firstRenderedRowOffset: number | null;
 }
 
 @Component
@@ -182,7 +182,7 @@ export default class VirtualGrid<P> extends Vue {
             };
         }
 
-        const elementWidth = containerData.elementSize ? containerData.elementSize.width : null;
+        const elementWidth = containerData.elementSize ? containerData.elementSize.width : 0;
 
         const windowMargin = this.getWindowMargin(containerData.windowSize.height);
 
@@ -332,7 +332,7 @@ export default class VirtualGrid<P> extends Vue {
 
     getColumnWidth(columnCount: number | null, gridGap: number | null, elementWidth: number | null) {
         if (columnCount === null || gridGap === null || elementWidth === null) {
-            return null;
+            return 0;
         }
 
         const totalGapSpace = (columnCount - 1) * gridGap;
@@ -414,6 +414,9 @@ export default class VirtualGrid<P> extends Vue {
         <div
             class="grid"
             :style="{
+                'display': '-ms-grid',
+                'display': 'grid',
+                'align-items': 'center',
                 'grid-template-columns': `repeat(${configData.columnCount}, 1fr)`,
                 'gap': `${configData.gridGap}px`,
             }"
@@ -434,10 +437,3 @@ export default class VirtualGrid<P> extends Vue {
         <component :is="loadingBatch && loader" />
     </div>
 </template>
-
-<style scoped>
-.grid {
-    display: grid;
-    align-items: center;
-}
-</style>
