@@ -8,6 +8,7 @@ import {
     debugLog,
 } from './utils';
 import { Item } from './types';
+import ScrollParent from 'scrollparent';
 
 interface ContainerData {
     windowSize: ElementSize;
@@ -50,7 +51,9 @@ interface RenderData<P> {
     firstRenderedRowOffset: number | null;
 }
 
-@Component
+@Component({
+    name: 'VirtualGrid',
+})
 export default class VirtualGrid<P> extends Vue {
     @Prop({ required: true }) items: Item<P>[];
     @Prop({ default: () => () => true }) updateFunction: () => Promise<boolean>;
@@ -99,12 +102,12 @@ export default class VirtualGrid<P> extends Vue {
         this.ref = this.$refs.virtualGrid as Element;
         this.initiliazeGrid();
         window.addEventListener('resize', this.resize);
-        window.addEventListener('scroll', this.scroll);
+        this.getListenerTarget().addEventListener('scroll', this.scroll);
     }
 
     beforeDestroy() {
         window.removeEventListener('resize', this.resize);
-        window.removeEventListener('scroll', this.scroll);
+        this.getListenerTarget().removeEventListener('scroll', this.scroll);
     }
 
     resize(): void {
@@ -394,6 +397,15 @@ export default class VirtualGrid<P> extends Vue {
     getElementOffset(element: Element) {
         return window.scrollY + element.getBoundingClientRect().top;
     }
+    getListenerTarget() {
+        let target: any = ScrollParent(this.ref as HTMLElement);
+        // Fix global scroll target for Chrome and Safari
+        if (window.document && (target === window.document.documentElement || target === window.document.body)) {
+            target = window;
+        }
+        return target;
+    }
+
 }
 </script>
 
@@ -424,6 +436,7 @@ export default class VirtualGrid<P> extends Vue {
             <div
                 v-for="item in renderData.cellsToRender"
                 :key="item.id"
+                class="grid-item-wraper"
                 :style="{
                     'height': `${item.height}px`,
                     'grid-column-start': item.columnNumber,
