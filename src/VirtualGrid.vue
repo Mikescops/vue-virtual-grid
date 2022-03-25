@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Prop, Component, Vue, ProvideReactive } from 'vue-property-decorator';
+import { Prop, Component, Watch, Vue, ProvideReactive } from 'vue-property-decorator';
 import {
     getGridGapDefault,
     getColumnCountDefault,
@@ -8,7 +8,6 @@ import {
     debugLog,
 } from './utils';
 import { Item } from './types';
-import ScrollParent from 'scrollparent';
 
 interface ContainerData {
     windowSize: ElementSize;
@@ -65,6 +64,7 @@ export default class VirtualGrid<P> extends Vue {
         width: number,
         columnWidth: number
     ) => number;
+    @Prop({ default: null }) scrollElement: HTMLElement | null;
     @Prop({ default: 500 }) updateTriggerMargin: number;
     @Prop({ default: null }) loader: Vue.Component;
     @Prop({ default: false }) debug: boolean;
@@ -102,12 +102,18 @@ export default class VirtualGrid<P> extends Vue {
         this.ref = this.$refs.virtualGrid as Element;
         this.initiliazeGrid();
         window.addEventListener('resize', this.resize);
-        this.getListenerTarget().addEventListener('scroll', this.scroll);
+        (this.scrollElement ?? window).addEventListener('scroll', this.scroll);
     }
 
     beforeDestroy() {
         window.removeEventListener('resize', this.resize);
-        this.getListenerTarget().removeEventListener('scroll', this.scroll);
+        (this.scrollElement ?? window).removeEventListener('scroll', this.scroll);
+    }
+
+    @Watch('scrollElement')
+    onScrollElementChanged(scrollElement: HTMLElement | null, oldScrollElement: HTMLElement | null) {
+        (oldScrollElement ?? window).removeEventListener('scroll', this.scroll);
+        (scrollElement ?? window).addEventListener('scroll', this.scroll);
     }
 
     resize(): void {
@@ -397,14 +403,6 @@ export default class VirtualGrid<P> extends Vue {
     getElementOffset(element: Element) {
         return window.scrollY + element.getBoundingClientRect().top;
     }
-    getListenerTarget() {
-        let target: any = ScrollParent(this.ref as HTMLElement);
-        // Fix global scroll target for Chrome and Safari
-        if (window.document && (target === window.document.documentElement || target === window.document.body)) {
-            target = window;
-        }
-        return target;
-    }
 
 }
 </script>
@@ -436,7 +434,7 @@ export default class VirtualGrid<P> extends Vue {
             <div
                 v-for="item in renderData.cellsToRender"
                 :key="item.id"
-                class="grid-item-wraper"
+                class="grid-item-wrapper"
                 :style="{
                     'height': `${item.height}px`,
                     'grid-column-start': item.columnNumber,

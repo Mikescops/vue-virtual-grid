@@ -63,8 +63,5 @@
     "ts",
     "type",
     "types"
-  ],
-  "dependencies": {
-    "scrollparent": "^2.0.1"
-  }
+  ]
 }
